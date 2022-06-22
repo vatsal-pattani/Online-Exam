@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}
+Leaderboard
+{% endblock title%}
+
+{% block content %}
+
+<h1>{{subject}}: Leaderboard</h1>
+<p>Maximum marks: {{tm}}</p>
+<table>
+    <tr>
+        <th>Student id</th>
+        <th>Marks obtained</th>
+        <th>Time Taken</th>
+    </tr>
+    {% for e in lb %}
+        <tr>
+            <td>{{e[0]}}</td>
+            <td>{{e[1]}}</td>
+            <td>{{e[2]}}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

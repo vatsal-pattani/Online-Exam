@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title%}
+Papers
+{% endblock title %}
+
+{% block content%}
+<form action="{{url_for('questions')}}" method="post">
+{% for paper in papers %}
+    <!-- <input type="submit" name = "paper" value="{{paper}}"> -->
+    <input type="submit" value="{{paper[0]}}" name="E_id">
+{% endfor %}
+</form>
+{% endblock content%}

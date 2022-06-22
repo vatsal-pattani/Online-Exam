@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title%}
+View Response
+{% endblock title %}
+
+{% block content%}
+<p>Maximum Marks: {{tm}}</p><br>
+<p>Marks obtained: {{om}}</p><br>
+
+{% for question,ans in zip(questions,given_ans) %}
+    <p>{{question[6]}}.  {{question[1]}} Marks:{{question[0]}}</p>
+    {% for i in range(2,6) %}
+        {% if(question[i][0]==ans[0]) %}
+            <input type="radio" disabled checked>{{question[i]}}<br>
+        {% else %}
+            <input type="radio" disabled>{{question[i]}}<br>
+        {% endif %}
+    {% endfor %}
+    <p>Correct Ans: {{question[-1]}}</p><br>
+{% endfor %}
+    <br>
+    <button type="button" onclick="window.location.href='{{url_for('leaderboard')}}';">Leaderboard</button>
+    <button type="button" onclick="window.location.href='{{url_for('dashboard')}}';">Go to Dashboard</button>
+{% endblock content%}

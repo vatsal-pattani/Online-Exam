@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title%}
+Questions
+{% endblock title %}
+
+{% block content%}
+<p>Maximum Marks: {{tm}}</p>
+<form action="{{url_for('result')}}" method="post">
+{% for question in questions %}
+    <p>{{question[-2]}}.  {{question[1]}} Marks:{{question[0]}}</p>
+    <input type="radio" name="{{question[-2]}}" value="A">{{question[2]}}<br>
+    <input type="radio" name="{{question[-2]}}" value="B">{{question[3]}}<br>
+    <input type="radio" name="{{question[-2]}}" value="C">{{question[4]}}<br>
+    <input type="radio" name="{{question[-2]}}" value="D">{{question[5]}}<br>
+    <input type="radio" name="{{question[-2]}}" value="None" checked>None<br>   <!--A bit confused about this-->
+{% endfor %}
+    <br>
+    <input type="submit">
+</form>
+{% endblock content%}

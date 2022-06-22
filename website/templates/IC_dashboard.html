@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title%}
+{{cname}} Papers
+{% endblock title %}
+
+{% block content%}
+<!-- <form action="{{url_for('questions')}}" method="post"> -->
+{% for paper in papers %}
+    <!-- <input type="submit" name = "paper" value="{{paper}}"> -->
+    <div>
+        <button type="button" onclick="window.location.href='{{ url_for( 'paper', E_id=paper[0] ) }}';">View paper: {{paper[0]}}</button>
+        <button type="button" onclick="window.location.href='{{ url_for( 'edit_paper', E_id=paper[0] ) }}';">Edit paper: {{paper[0]}}</button>
+    </div>
+{% endfor %}
+<!-- </form> -->
+{% endblock content%}

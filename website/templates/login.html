@@ -1,0 +1,20 @@
+    {% extends "base.html" %}
+    {% block title %}{{log_type}} Login{% endblock title %}
+    
+    {% block content %}
+    <div type="margin-top:200px" align="center">
+        <h1>{{log_type}} Login</h1>
+        <form action="{{url_for('verify', log_type=log_type)}}" method="post">
+            <label for="ID">ID:</label>
+            <input type="text" name="ID" placeholder="Enter ID"><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" name="passw" placeholder="Enter password"><br>
+            <button type="submit">Sign in</button>
+        </form>
+    </div>
+
+    <div align="center">
+        <a href="{{url_for('reset_passw')}}">Forgot password?</a>
+    </div>
+    {% endblock content %}

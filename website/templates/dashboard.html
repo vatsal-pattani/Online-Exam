@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}
+Dashboard
+{% endblock title %}
+
+{% block content %}
+<form action="{{url_for('papers')}}" method="post">
+{% for course in courses %}
+    <input type="submit" value="{{course[0]}} : {{course[1]}}" name="subject"><br>
+    <br>
+
+{% endfor %}
+</form>
+{% endblock content %}

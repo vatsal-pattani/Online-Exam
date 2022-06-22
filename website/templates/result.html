@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}
+Result
+{% endblock title %}
+
+{% block content %}
+<p> You got {{om}}/{{tm}} Marks</p>
+<button type="button" onclick="window.location.href='{{url_for('response')}}';">View Response</button>
+<button type="button" onclick="window.location.href='{{url_for('leaderboard')}}';">Leaderboard</button>
+<button type="button" onclick="window.location.href='{{url_for('dashboard')}}';">Go to Dashboard</button>
+
+{% endblock content %}
