@@ -20,7 +20,7 @@ def login():
     log_type = request.form.get('Login')
     return render_template("login.html", log_type=log_type)
 
-@app.route('/verify/<log_type>', methods=['GET','POST'])
+@app.route('/verify/<log_type>', methods=['POST'])
 def verify(log_type):
     print("verification started")
     ID=request.form.get('ID')
@@ -70,31 +70,22 @@ def papers():
 def questions():
     E_id = request.form.get('E_id')
     session['E_id']=E_id
-    total_marks=execute(f'''select total_marks from exam where (exam.e_id = '{E_id}') and (exam.c_id = '{session['c_id']}');''')[0][0]
     
-    session['total_marks'] = total_marks
-    print("Total Marks:",total_marks)
     # First check if the student has already attempted this paper
     given = execute(f''' select exists(select * from result where (result.c_id='{session['c_id']}') and (result.s_id = '{session['ID']}') and (result.e_id='{session['E_id']}'));''')
+
+    total_marks=execute(f'''select total_marks from exam where (exam.e_id = '{E_id}') and (exam.c_id = '{session['c_id']}');''')[0][0]
+    session['total_marks'] = total_marks
+    print("Total Marks:",total_marks)
 
     if given[0][0]==1:
         session['given']=1  # given is 1 if student has already attempted the paper
         return redirect(url_for('result'))
     
     session['given']=0  # Student hasn't attampted the paper
-    questions = execute(f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = 'e00001') and (questions.C_id = 'c00001'); -- Displays all questions of that test ''')
-    session['questions']=questions    #This conains everything including correct answers
-
-    # store all Q_id in a separate list. Will be useful later while calculating marks
-    qid_list = []
-    ans_list = []
-    for q in questions:
-        ans_list.append(q[-1])
-        q=q[:7]                       #Removing correct answers so that we can pass it to webpage of question paper
-        qid_list.append(q[6])
     
-    session['qid_list']=qid_list  # This is list of q_id
-    session['ans_list']=ans_list  # This is list of correct answers
+    questions = execute(f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
+
 
     # We can calculate total marks of exam here. we actually fetched it from database
     # But the snippet below will be useful when IC creates a paper
@@ -112,14 +103,25 @@ def questions():
 def result():
     total_marks=float(session['total_marks'])
     if(session['given']==0):
-        q_ids = session['qid_list']
-        correct_ans=session['ans_list']
+
+        questions = execute(f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
+
+        # store all Q_id in a separate list. Will be useful later while calculating marks
+        qid_list = []
+
+        # Fetch all correct answers
+        correct_ans = []
+        for q in questions:
+            correct_ans.append(q[-1])
+            q=q[:7]                       #Removing correct answers so that we can pass it to webpage of question paper
+            qid_list.append(q[6])
+
+        #Fetch all given answers
         f = request.form
         given_ans = []
         for entry in f:
             given_ans.append(f[entry])
-        session['given_ans']=given_ans
-        questions=session['questions']
+
         # Calculate obtained marks now.
         obtained_marks=0
         i=0
@@ -135,36 +137,18 @@ def result():
         # Here we are not saving E_id to db. Hence, if same question(with same Q_id) is added to multiple papers, and the student attempts multiple of those papers, then it will create an issue.
         # But assume that a question belongs to one paper only
         ID=session['ID']
-
-        # for q in q_ids:                 #This seems inefficient as we are making new connection every time
-        #     print(given_ans[i])
-        #     db=connect()
-        #     db.autocommit=True
-        #     cur=db.cursor()
-        #     if(given_ans[i]=='None'):
-        #         cur.execute(
-        #             f'''insert into Response(Q_id,S_id,marks,Response)
-        #             values ('{q}', '{ID}',{questions[i][0]}, NULL); -- Marks obtained in each question will be provided by python program'''
-        #         )
-        #     else:
-        #         cur.execute(
-        #             f'''insert into Response(Q_id,S_id,marks,Response)
-        #             values ('{q}', '{ID}',{questions[i][0]}, '{given_ans[i]}'); -- Marks obtained in each question will be provided by python program'''
-        #         ) # This gives error when given ans is None
-        #     cur.close()
-        #     i=i+1
-
+        
         query=f'''insert into Response(Q_id,S_id,marks,Response)
                         values '''
         null_val='NULL'
         i=0
-        for q in q_ids:
+        for q in qid_list:
             if(given_ans[i]=='None'):
                 query = query + f"('{q}','{ID}',{questions[i][0]}, {null_val}),"
             else:
                 query = query + f"('{q}','{ID}',{questions[i][0]}, '{given_ans[i]}'),"
             i=i+1
-        query=query[:-1]  #Poppinf last extra comma
+        query=query[:-1]  #Popping last extra comma
         query += ";" #Adding one semicolon
         execute(query)    # This saves Response in db
 
@@ -183,30 +167,26 @@ def result():
 
 @app.route('/view_response')
 def response():
-    if(session['given']==1):
         
-        # Fetch questions from db, because they are not in session
-        questions = execute(f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
-        
-        # Fetch given_ans from db, because they are not in session
-        given_ans = execute(f'''select response from response 
-                        where response.s_id='{session['ID']}' and response.Q_id in 
-                        (select Q_id from Questions where (Questions.E_id='{session['E_id']}') and (Questions.c_id='{session['c_id']}'));''')
-        print(given_ans)
-    else:
-        questions=session['questions']
-        given_ans=session['given_ans']
+    # Fetch questions from db
+    questions = execute(f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
+    
+    # Fetch given_ans from db
+    given_ans = execute(f'''select response from response 
+                    where response.s_id='{session['ID']}' and response.Q_id in 
+                    (select Q_id from Questions where (Questions.E_id='{session['E_id']}') and (Questions.c_id='{session['c_id']}'));''')
+    print(given_ans)
+
     return render_template('view_r.html',questions=questions, given_ans=given_ans, tm=session['total_marks'],om=session['obtained_marks'], zip=zip, range=range)
 
 @app.route('/leaderboard')
 def leaderboard():
     LeadBoard = execute(f'''select S_id,marks,time_taken from Result where (Result.C_id = '{session['c_id']}') and (Result.E_id = '{session['E_id']}') order by Marks desc, time_taken asc;  -- Displays leaderboard for this test ''')
-    print(LeadBoard)
     return render_template('Leaderboard.html', lb=LeadBoard, subject=session['subject'], paper=session['E_id'], tm=session['total_marks'])
 
 @app.route('/Log Out')
 def logout():
-    session.pop()
+    session.clear()
     return redirect(url_for('home'))
 
 @app.route('/IC_dashboard')
@@ -215,15 +195,36 @@ def IC_dashboard():
     # Now we have to fetch all info of his course
     IC_info = execute(f'''select IC_Name,title,C_id 
                     from Course 
-                    where (IC_id = 'p00001') and (IC_Password = 'DBS'); ''')[0]
+                    where (IC_id = '{session['ID']}') and (IC_Password = '{session['passw']}'); ''')[0]
     
     course_name = IC_info[1]
-    session['course']=course_name
+    session['subject']=course_name
+
     papers = execute(f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{IC_info[2]}'); ''')
 
     return render_template("IC_dashboard.html",IC_info=IC_info, papers=papers)
+
+@app.route('/view_paper')
+def view_paper():
+    E_id = request.form.get('E_id')
+    session['E_id']=E_id
+    subject=session['subject']
+    c_id = execute(f'''select C_id from course where (title = '{subject}'); ''')
+    session['c_id']=c_id[0][0]
+
+    total_marks=execute(f'''select total_marks from exam where (exam.e_id = '{E_id}') and (exam.c_id = '{session['c_id']}');''')[0][0]
+    session['total_marks'] = total_marks
+    
+    questions = execute(f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
+
+    return render_template("questions_IC.html",questions=questions, tm=total_marks)
+
+@app.route('/add_paper')
+def add_paper():
+    pass    
 
 @app.route('/edit_paper/<E_id>')
 def edit_paper(E_id):
     print(E_id)
     return "Here you edit the paper "
+
