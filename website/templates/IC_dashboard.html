@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block title%}
@@ -16,4 +17,25 @@
 </div>
 {% endfor %}
 <!-- </form> -->
+=======
+{% extends "base.html" %}
+
+{% block title%}
+{{cname}} Papers
+{% endblock title %}
+
+{% block content%}
+
+{% for paper in papers %}
+    <div>
+        <button type="button" onclick="window.location.href='{{ url_for( 'view_paper', E_id=paper[0] ) }}';">View paper: {{paper[0]}}</button>
+    </div>
+{% endfor %}
+
+<div>
+    <button type="button" onclick="window.location.href='{{ url_for( 'add_paper') }}';">Add new paper</button>
+</div>
+
+
+>>>>>>> 9f831dcf6638859f5afff627a18074e6d9e1f863
 {% endblock content%}
