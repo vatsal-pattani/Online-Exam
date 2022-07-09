@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title%}
+Create Paper
+{% endblock title %}
+
+{% block content%}
+
+<form id = "0" method="post">
+    <label for="total_marks">total marks: </label>
+    <input type="number" name="basic_info" id="total_marks" disabled placeholder="0"><br>
+
+    <label for="duration">Duration of paper: </label>
+    <input type="time" name="basic_info" id="duration"><br>
+
+    <label for="timing">Select date and time of the paper: </label>
+    <input type="datetime-local" name="basic_info" id="timing" onclick="set_today()"><br>
+
+    <script>
+        function set_today(){
+            var today = new Date().toISOString().slice(0, 16);
+            document.getElementsByName("timing")[0].min = today;
+        }
+    </script>
+</form>
+
+<div id="questions">
+
+</div>
+
+<button onclick="removeQ()">Remove Question</button>
+<br><br>
+<br><br>
+<button onclick="addQ()">Add Question</button>
+<br><br>
+<button type = "submit" onclick="validate()">Submit</button>
+<br><br>
+<button type="button" onclick="window.location.href='{{url_for('IC_dashboard')}}';">Go to Dashboard</button>
+
+
+<script>
+    function isEmpty(element){
+        if(element==null || element=="" || element==0)return true;
+        return false;
+    }
+    function validate(){
+        if(q_no==1){
+            alert('Add at least one question');
+        }
+        else{
+            let flag=0;
+            for(let i=1; i<q_no; i++){
+                let form = document.getElementById("f"+i);
+                var q = form["q"].value;
+                var A = form["A"].value;
+                var B = form["B"].value;
+                var C = form["C"].value;
+                var D = form["D"].value;
+                var ca = form["c_ans"].value;
+                var marks = form["marks"].value;
+                // var err = form["error"].innerHTML;
+                var err_fieldRequired = document.createElement("p");
+                err_fieldRequired.innerHTML = "Fill all required fields";
+                err_fieldRequired.setAttribute('name', "empty error");
+                err_fieldRequired.style.color = "red";
+
+                var err_cAns = document.createElement("p");
+                err_cAns.innerHTML = "correct ans should be from A,B,C,D";
+                err_cAns.setAttribute('name', "correct ans error");
+                err_cAns.style.color = "red";
+
+                var err_mark = document.createElement("p");
+                err_mark.innerHTML = "marks should be +ve number";
+                err_mark.setAttribute('name', "marks error");
+                err_mark.style.color = "red";
+
+                if(!isEmpty(q) && !isEmpty(A) && !isEmpty(B) && !isEmpty(C) && !isEmpty(D) && !isEmpty(marks)){
+                    if((ca == 'A' || ca == 'B' || ca == 'C' || ca == 'D') && marks!=0){
+                        form.submit();
+                    }
+                    else{
+                        if(marks<=0 && form.children["marks error"]==null)form.appendChild(err_mark);
+                        else if(form.children["correct ans error"] == null)form.appendChild(err_cAns);
+                        flag=1;
+                    }
+                }
+                else{
+                    flag=1;
+                    if(form.children["empty error"] == null)form.appendChild(err_fieldRequired);
+                }
+            }
+            if(flag==0)window.location.replace("{{url_for('add_paper')}}");
+        }
+        
+        
+    }
+    // function required(form){
+    //     document.write(form.getElementsByTagName('input') + "***");
+    //     let eles = form.getElementsByTagName("input");
+    //     // eles.forEach(notEmpty);
+    //     // console.log("Eles length: " + eles.length);
+    //     try{
+    //         for(let i=0; i<eles.length; i++){
+    //             console.log(eles[i] + "**");
+    //         }
+    //     }
+    //     catch(e){
+    //         console.log(e);
+    //         form.appendChild(err);
+    //     }
+        
+    // }
+    // let err = document.createElement("textarea");
+    // err.innerHTML = "Field Required";
+
+    // function notEmpty(item){
+    //     console.log(item.innerHTML);
+    //     if(item.value == null)item.parentNode.appendChild(err.cloneNode());
+    // }
+
+    var q_no = 1;
+    function addQ(){
+        const f = document.createElement("form");
+        f.id = "f"+ q_no;
+
+        const q = document.createElement("input");
+        q.type = "text";
+        q.id = "q"+q_no;
+        q.name = "q";
+        q.placeholder = "Type your question here";
+
+        const lq = document.createElement("label");
+        lq.for="q"+q_no;
+        lq.innerHTML = "Q"+q_no+". ";
+
+        const a = document.createElement("input")
+        a.type = "text";
+        a.id = "A"+q_no;
+        a.name = "A";
+        a.placeholder="Option 1";
+
+        const la = document.createElement("label");
+        la.htmlFor="A"+q_no;
+        la.innerHTML = "A. "
+
+        const b = document.createElement("input")
+        b.type = "text";
+        b.id = "B"+q_no;
+        b.name = "B";
+        b.placeholder="Option 2";
+
+        const lb = document.createElement("label");
+        lb.htmlFor="B"+q_no;
+        lb.innerHTML = "B. "
+
+        const c = document.createElement("input")
+        c.type = "text";
+        c.id = "C"+q_no;
+        c.name = "C";
+        c.placeholder="Option 3";
+
+        const lc = document.createElement("label");
+        lc.htmlFor="C"+q_no;
+        lc.innerHTML = "C. "
+
+        const d = document.createElement("input")
+        d.type = "text";
+        d.id = "D"+q_no;
+        d.name = "D";
+        d.placeholder="Option 4";
+
+        const ld = document.createElement("label");
+        ld.htmlFor="D"+q_no;
+        ld.innerHTML = "D. "
+
+        const correct_ans = document.createElement("input")
+        correct_ans.type = "text";
+        correct_ans.id = "correct_ans"+q_no;
+        correct_ans.name = "c_ans";
+        correct_ans.placeholder="A,B,C,D";
+
+        const lca = document.createElement("label");
+        lca.htmlFor="correct_ans"+q_no;
+        lca.innerHTML = "Correct Ans. "
+
+        const marks = document.createElement("input")
+        marks.type = "number";
+        marks.id = "marks"+q_no;
+        marks.name = "marks";
+        marks.placeholder="marks";
+
+        const lm = document.createElement("label");
+        lm.htmlFor="marks"+q_no;
+        lm.innerHTML = "Marks. "
+
+        const p = document.createElement("p");
+        p.name = "p";
+        const err = document.createTextNode("Hello");
+        err.name = "error";
+        
+
+        // p.appendChild(err);
+
+        q_no++;
+
+        const br = document.createElement('br');
+
+        f.appendChild(lq);
+        f.appendChild(q);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(la);
+        f.appendChild(a);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(lb);
+        f.appendChild(b);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(lc);
+        f.appendChild(c);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(ld);
+        f.appendChild(d);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(lca);
+        f.appendChild(correct_ans);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(lm);
+        f.appendChild(marks);
+        f.appendChild(br.cloneNode());
+
+        f.appendChild(p.cloneNode());
+
+        document.getElementById('questions').appendChild(f);
+    }
+
+    function removeQ(){
+        if(q_no==1)return;
+        q_no--;
+        document.getElementById("f"+q_no).remove();
+    }
+</script>   
+{% endblock content%}

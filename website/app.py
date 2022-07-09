@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, url_for, session
 from .users import *
 
@@ -195,12 +196,13 @@ def IC_dashboard():
     # Now we have to fetch all info of his course
     IC_info = execute(f'''select IC_Name,title,C_id 
                     from Course 
-                    where (IC_id = '{session['ID']}') and (IC_Password = '{session['passw']}'); ''')[0]
+                    where (IC_id = '{session['ID']}'); ''')[0]
     
     course_name = IC_info[1]
     session['subject']=course_name
+    session['c_id']=IC_info[2]
 
-    papers = execute(f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{IC_info[2]}'); ''')
+    papers = execute(f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{session['c_id']}'); ''')
 
     return render_template("IC_dashboard.html",IC_info=IC_info, papers=papers)
 
@@ -219,12 +221,26 @@ def view_paper():
 
     return render_template("questions_IC.html",questions=questions, tm=total_marks)
 
-@app.route('/add_paper')
-def add_paper():
-    pass    
+@app.route('/create_paper', methods=['GET', 'POST'])
+def create_paper():
+    
+    return render_template("create_paper.html", session=session)
+
+@app.route('/add_paper', methods=['GET','POST'])
+def add_paper():   #This will add paper to db
+    # First we will have to generate new E_id for this c_id, we'll have to refer to db for that
+    # last_eid = execute(f'''select E_id from exam
+    #             where exam.c_id = '{session['c_id']}'
+    #             order by E_id desc
+    #             limit 1''')[0][0]
+    # new_eid = "e" + str(int(last_eid[1:]) + 1).zfill(5)   # Creating a new e_id
+
+    # request.form
+
+    return "Paper added successfully"
 
 @app.route('/edit_paper/<E_id>')
 def edit_paper(E_id):
     print(E_id)
-    return "Here you edit the paper "
+    return "Here you edit the paper"
 
