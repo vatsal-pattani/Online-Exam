@@ -1,6 +1,9 @@
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from .users import *
+from dotenv import load_dotenv
+
+load_dotenv()  # take environment variables from .env.
 
 
 app = Flask(__name__)
@@ -19,7 +22,9 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    log_type = request.form.get('Login')
+    log_type = request.args.get('type')
+    if log_type not in ["Student", "IC", "Admin"]:
+        return render_template("404.html"), 404
     return render_template("login.html", log_type=log_type)
 
 
@@ -273,3 +278,7 @@ def add_paper():  # This will add paper to db
 def edit_paper(E_id):
     print(E_id)
     return "Here you edit the paper"
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404

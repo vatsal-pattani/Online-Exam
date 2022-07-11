@@ -3,25 +3,15 @@
 
 {% block content %}
 <!-- <div align="center"> -->
-    <h1 style="margin-top: 100px" align="center">Welcome to Online Examination Portal!</h1>
+<h1 style="margin-top: 100px" align="center">Welcome to Online Examination Portal!</h1>
 <!-- </div> -->
+<div class="container p-5 w-25 btn-group-vertical d-flex align-items-center justify-content-center">
+  <a class="btn btn-primary btn-lg " style="background-color: #6e95eb" href="{{ url_for('login', type='Student') }}"
+    role="button">Student Login</a>
+  <a class="btn btn-primary btn-lg " style="background-color: #de5555" href="{{ url_for('login', type='IC') }}"
+    role="button">Instructor Login</a>
+  <a class="btn btn-primary btn-lg " style="background-color: #4a9f64" href="{{ url_for('login', type='Admin') }}"
+    role="button">Admin Login</a>
+</div>
 
-<div style="margin-top: 200px" align="center">
-    <form action="{{url_for('login')}}" method="post">
-      <!-- <label for="sLogin">Student Login</label> -->
-      Student Login
-      <input type="radio" name="Login" value="Student"><br>
-
-      <!-- <label for="ILogin">IC Login</label> -->
-      IC Login
-      <input type="radio" name="Login" value="IC"><br>
-
-      <!-- <label for="ALogin">Admin Login</label> -->
-      Admin Login
-      <input type="radio" name="Login" value="Admin"><br>
-
-      <button type="submit">Submit</button>
-    </form>
-  </div>
-  
 {% endblock content %}

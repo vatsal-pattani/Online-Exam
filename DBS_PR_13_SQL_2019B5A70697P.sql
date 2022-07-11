@@ -118,10 +118,10 @@ C_id varchar(6) not null,
 foreign key (S_id) references Student(S_id),
 foreign key (C_id) references Course(C_id));
 
--- insert into takes(S_id,C_id)
--- values
--- 	('s00001','c00001'),
---     ('s00001','c00002');
+insert into takes(S_id,C_id)
+values
+	('s00001','c00001'),
+    ('s00001','c00002');
 
 create table if not exists Belongs_to(
 C_id varchar(6) not null,

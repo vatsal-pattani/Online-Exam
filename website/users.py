@@ -35,12 +35,12 @@ def verify_in_db(ID, passw, log_type):
 
     result = cur.fetchall()
     cur.close()
-    print(result)
-    print(type(result[0]))
     if not result:
         return False
 
     else:
+        print(result)
+        print(type(result[0]))
         return True
 
 
