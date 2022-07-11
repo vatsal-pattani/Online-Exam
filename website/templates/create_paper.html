@@ -6,15 +6,15 @@ Create Paper
 
 {% block content%}
 
-<form id = "0" method="post">
+<form id = "0" method="post" action="{{url_for('add_paper')}}" name="basic_info">
     <label for="total_marks">total marks: </label>
-    <input type="number" name="basic_info" id="total_marks" disabled placeholder="0"><br>
+    <input type="number" name="total_marks" id="total_marks" disabled placeholder="0"><br>
 
-    <label for="duration">Duration of paper: </label>
-    <input type="time" name="basic_info" id="duration"><br>
+    <label for="duration">Duration of paper(hh:mm): </label>
+    <input type="time" name="duration id="duration"><br>
 
     <label for="timing">Select date and time of the paper: </label>
-    <input type="datetime-local" name="basic_info" id="timing" onclick="set_today()"><br>
+    <input type="datetime-local" name="timing" id="timing" onclick="set_today()"><br>
 
     <script>
         function set_today(){
@@ -31,7 +31,7 @@ Create Paper
 <button onclick="removeQ()">Remove Question</button>
 <br><br>
 <br><br>
-<button onclick="addQ()">Add Question</button>
+<button onclick="calc_marks(); addQ();">Add Question</button>
 <br><br>
 <button type = "submit" onclick="validate()">Submit</button>
 <br><br>
@@ -39,8 +39,16 @@ Create Paper
 
 
 <script>
+    function calc_marks(){
+        var marks=0;
+        for(let i=1; i<q_no; i++){
+            let form = document.getElementById("f"+i);
+            marks = marks + parseInt(form["marks"+q_no].value);
+        }
+        document.getElementById("total_marks").value=marks;
+    }
     function isEmpty(element){
-        if(element==null || element=="" || element==0)return true;
+        if(element==null || element=="")return true;
         return false;
     }
     function validate(){
@@ -49,15 +57,16 @@ Create Paper
         }
         else{
             let flag=0;
+            // let fd = new FormData();
             for(let i=1; i<q_no; i++){
                 let form = document.getElementById("f"+i);
-                var q = form["q"].value;
-                var A = form["A"].value;
-                var B = form["B"].value;
-                var C = form["C"].value;
-                var D = form["D"].value;
-                var ca = form["c_ans"].value;
-                var marks = form["marks"].value;
+                var q = form["q"+q_no].value;
+                var A = form["A"+q_no].value;
+                var B = form["B"+q_no].value;
+                var C = form["C"+q_no].value;
+                var D = form["D"+q_no].value;
+                var ca = form["c_ans"+q_no].value;
+                var marks = form["marks"+q_no].value;
                 // var err = form["error"].innerHTML;
                 var err_fieldRequired = document.createElement("p");
                 err_fieldRequired.innerHTML = "Fill all required fields";
@@ -74,9 +83,11 @@ Create Paper
                 err_mark.setAttribute('name', "marks error");
                 err_mark.style.color = "red";
 
-                if(!isEmpty(q) && !isEmpty(A) && !isEmpty(B) && !isEmpty(C) && !isEmpty(D) && !isEmpty(marks)){
-                    if((ca == 'A' || ca == 'B' || ca == 'C' || ca == 'D') && marks!=0){
+                if(!isEmpty(q) && !isEmpty(A) && !isEmpty(B) && !isEmpty(C) && !isEmpty(D)){
+                    if((ca == 'A' || ca == 'B' || ca == 'C' || ca == 'D') && marks>0){
+                        // fd.append("F"+q_no, form);
                         form.submit();
+                        
                     }
                     else{
                         if(marks<=0 && form.children["marks error"]==null)form.appendChild(err_mark);
@@ -89,85 +100,77 @@ Create Paper
                     if(form.children["empty error"] == null)form.appendChild(err_fieldRequired);
                 }
             }
-            if(flag==0)window.location.replace("{{url_for('add_paper')}}");
+            
+            if(flag==0){
+                // document.getElementById('0').submit();
+            }
         }
         
         
     }
-    // function required(form){
-    //     document.write(form.getElementsByTagName('input') + "***");
-    //     let eles = form.getElementsByTagName("input");
-    //     // eles.forEach(notEmpty);
-    //     // console.log("Eles length: " + eles.length);
-    //     try{
-    //         for(let i=0; i<eles.length; i++){
-    //             console.log(eles[i] + "**");
-    //         }
-    //     }
-    //     catch(e){
-    //         console.log(e);
-    //         form.appendChild(err);
-    //     }
-        
-    // }
-    // let err = document.createElement("textarea");
-    // err.innerHTML = "Field Required";
-
-    // function notEmpty(item){
-    //     console.log(item.innerHTML);
-    //     if(item.value == null)item.parentNode.appendChild(err.cloneNode());
-    // }
 
     var q_no = 1;
     function addQ(){
         const f = document.createElement("form");
         f.id = "f"+ q_no;
+        f.name="form"+q_no;
+        f.method="post";
+        f.action="/add_paper";
+        f.submit(function(event){
+        event.preventDefault();
+        f.submit();
+        })
 
-        const q = document.createElement("input");
-        q.type = "text";
+        const q = document.createElement("textarea");
         q.id = "q"+q_no;
-        q.name = "q";
+        q.name = "q"+q_no;
         q.placeholder = "Type your question here";
+        q.rows="5";
+        q.cols="40";
 
         const lq = document.createElement("label");
         lq.for="q"+q_no;
         lq.innerHTML = "Q"+q_no+". ";
 
-        const a = document.createElement("input")
-        a.type = "text";
+        const a = document.createElement("textarea")
         a.id = "A"+q_no;
-        a.name = "A";
+        a.name = "A"+q_no;
         a.placeholder="Option 1";
+        a.rows="3";
+        a.cols="20";
 
         const la = document.createElement("label");
         la.htmlFor="A"+q_no;
         la.innerHTML = "A. "
 
-        const b = document.createElement("input")
-        b.type = "text";
+        const b = document.createElement("textarea")
         b.id = "B"+q_no;
-        b.name = "B";
+        b.name = "B"+q_no;
         b.placeholder="Option 2";
+        b.rows="3";
+        b.cols="20";
 
         const lb = document.createElement("label");
         lb.htmlFor="B"+q_no;
         lb.innerHTML = "B. "
 
-        const c = document.createElement("input")
-        c.type = "text";
+        const c = document.createElement("textarea")
         c.id = "C"+q_no;
-        c.name = "C";
+        c.name = "C"+q_no;
         c.placeholder="Option 3";
+        c.rows="3";
+        c.cols="20";
 
         const lc = document.createElement("label");
         lc.htmlFor="C"+q_no;
         lc.innerHTML = "C. "
 
-        const d = document.createElement("input")
-        d.type = "text";
+        const d = document.createElement("textarea")
         d.id = "D"+q_no;
-        d.name = "D";
+        d.name = "D"+q_no;
         d.placeholder="Option 4";
+        d.rows="3";
+        d.cols="20";
 
         const ld = document.createElement("label");
         ld.htmlFor="D"+q_no;
@@ -176,7 +179,7 @@ Create Paper
         const correct_ans = document.createElement("input")
         correct_ans.type = "text";
         correct_ans.id = "correct_ans"+q_no;
-        correct_ans.name = "c_ans";
+        correct_ans.name = "c_ans"+q_no;
         correct_ans.placeholder="A,B,C,D";
 
         const lca = document.createElement("label");
@@ -186,8 +189,9 @@ Create Paper
         const marks = document.createElement("input")
         marks.type = "number";
         marks.id = "marks"+q_no;
-        marks.name = "marks";
+        marks.name = "marks"+q_no;
         marks.placeholder="marks";
+        marks.defaultValue=0;
 
         const lm = document.createElement("label");
         lm.htmlFor="marks"+q_no;
@@ -195,8 +199,6 @@ Create Paper
 
         const p = document.createElement("p");
         p.name = "p";
-        const err = document.createTextNode("Hello");
-        err.name = "error";
         
 
         // p.appendChild(err);
