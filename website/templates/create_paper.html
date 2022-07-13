@@ -31,7 +31,7 @@ Create Paper
 <button onclick="removeQ()">Remove Question</button>
 <br><br>
 <br><br>
-<button onclick="calc_marks(); addQ();">Add Question</button>
+<button type="button" onclick="calc_marks(); addQ();">Add Question</button>
 <br><br>
 <button type = "submit" onclick="validate()">Submit</button>
 <br><br>
@@ -43,14 +43,16 @@ Create Paper
         var marks=0;
         for(let i=1; i<q_no; i++){
             let form = document.getElementById("f"+i);
-            marks = marks + parseInt(form["marks"+q_no].value);
+            marks = marks + parseInt(form["marks"+i].value);
         }
         document.getElementById("total_marks").value=marks;
     }
+
     function isEmpty(element){
         if(element==null || element=="")return true;
         return false;
     }
+
     function validate(){
         if(q_no==1){
             alert('Add at least one question');
@@ -60,13 +62,13 @@ Create Paper
             // let fd = new FormData();
             for(let i=1; i<q_no; i++){
                 let form = document.getElementById("f"+i);
-                var q = form["q"+q_no].value;
-                var A = form["A"+q_no].value;
-                var B = form["B"+q_no].value;
-                var C = form["C"+q_no].value;
-                var D = form["D"+q_no].value;
-                var ca = form["c_ans"+q_no].value;
-                var marks = form["marks"+q_no].value;
+                var q = form["q"+i].value;
+                var A = form["A"+i].value;
+                var B = form["B"+i].value;
+                var C = form["C"+i].value;
+                var D = form["D"+i].value;
+                var ca = form["c_ans"+i].value;
+                var marks = form["marks"+i].value;
                 // var err = form["error"].innerHTML;
                 var err_fieldRequired = document.createElement("p");
                 err_fieldRequired.innerHTML = "Fill all required fields";
@@ -109,17 +111,30 @@ Create Paper
         
     }
 
+    function sleep(milliseconds) {
+        var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+            if ((new Date().getTime() - start) > milliseconds){
+            break;
+            }
+        }
+        }
+
     var q_no = 1;
     function addQ(){
         const f = document.createElement("form");
         f.id = "f"+ q_no;
         f.name="form"+q_no;
         f.method="post";
-        f.action="/add_paper";
-        f.submit(function(event){
-        event.preventDefault();
-        f.submit();
-        })
+        f.action="{{url_for('add_paper')}}";
+        function handleForm(event) { event.preventdefault(); f.submit();  alert(f.name + "submitted"); }
+        // f.addEventListener('onsubmit', handleForm);
+        f.onsubmit = handleForm;
+        // f.submit(function(event){
+        // event.preventDefault();
+        // console.log(f.name + "submitted")
+        // f.submit();
+        // })
 
         const q = document.createElement("textarea");
         q.id = "q"+q_no;

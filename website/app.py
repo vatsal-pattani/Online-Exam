@@ -262,7 +262,7 @@ def create_paper():
 
 @app.route('/add_paper', methods=['GET', 'POST'])
 def add_paper():  # This will add paper to db
-    
+    print(request.form)
 
     # First we will have to generate new E_id for this c_id, we'll have to refer to db for that
     # last_eid = execute(f'''select E_id from exam
