@@ -6,12 +6,12 @@ Create Paper
 
 {% block content%}
 
-<form id = "0" method="post" action="{{url_for('add_paper')}}" name="basic_info">
+<form id = "0" method="post" action="{{url_for('add_exam')}}" name="basic_info">
     <label for="total_marks">total marks: </label>
     <input type="number" name="total_marks" id="total_marks" disabled placeholder="0"><br>
 
     <label for="duration">Duration of paper(hh:mm): </label>
-    <input type="time" name="duration id="duration"><br>
+    <input type="time" name="duration" id="duration"><br>
 
     <label for="timing">Select date and time of the paper: </label>
     <input type="datetime-local" name="timing" id="timing" onclick="set_today()"><br>
@@ -31,9 +31,9 @@ Create Paper
 <button onclick="removeQ()">Remove Question</button>
 <br><br>
 <br><br>
-<button type="button" onclick="calc_marks(); addQ();">Add Question</button>
+<button type="button" onclick="addQ();">Add Question</button>
 <br><br>
-<button type = "submit" onclick="validate()">Submit</button>
+<button type = "button" onclick="validate()">Submit</button>
 <br><br>
 <button type="button" onclick="window.location.href='{{url_for('IC_dashboard')}}';">Go to Dashboard</button>
 
@@ -43,7 +43,10 @@ Create Paper
         var marks=0;
         for(let i=1; i<q_no; i++){
             let form = document.getElementById("f"+i);
-            marks = marks + parseInt(form["marks"+i].value);
+            let m = parseInt(form['marks'].value);
+            console.log(m === m);
+            if(m === m)
+                marks = marks + m;
         }
         document.getElementById("total_marks").value=marks;
     }
@@ -53,22 +56,29 @@ Create Paper
         return false;
     }
 
+    function send_form(form, i){
+        const req = new XMLHttpRequest();
+        const fd = new FormData(form);
+        req.open("POST","{{url_for('add_question')}}", false);
+        fd.append("q_no", i)
+        req.send(fd);
+    }
+
     function validate(){
         if(q_no==1){
             alert('Add at least one question');
         }
         else{
             let flag=0;
-            // let fd = new FormData();
             for(let i=1; i<q_no; i++){
                 let form = document.getElementById("f"+i);
-                var q = form["q"+i].value;
-                var A = form["A"+i].value;
-                var B = form["B"+i].value;
-                var C = form["C"+i].value;
-                var D = form["D"+i].value;
-                var ca = form["c_ans"+i].value;
-                var marks = form["marks"+i].value;
+                var q = form["q"].value;
+                var A = form["A"].value;
+                var B = form["B"].value;
+                var C = form["C"].value;
+                var D = form["D"].value;
+                var ca = form["c_ans"].value;
+                var marks = form["marks"].value;
                 // var err = form["error"].innerHTML;
                 var err_fieldRequired = document.createElement("p");
                 err_fieldRequired.innerHTML = "Fill all required fields";
@@ -87,8 +97,7 @@ Create Paper
 
                 if(!isEmpty(q) && !isEmpty(A) && !isEmpty(B) && !isEmpty(C) && !isEmpty(D)){
                     if((ca == 'A' || ca == 'B' || ca == 'C' || ca == 'D') && marks>0){
-                        // fd.append("F"+q_no, form);
-                        form.submit();
+                        send_form(form, i);
                         
                     }
                     else{
@@ -104,41 +113,25 @@ Create Paper
             }
             
             if(flag==0){
-                // document.getElementById('0').submit();
+                document.getElementById('0')['total_marks'].removeAttribute("disabled");
+                console.log(document.getElementById('0'));
+                document.getElementById('0').submit();
             }
         }
         
         
     }
 
-    function sleep(milliseconds) {
-        var start = new Date().getTime();
-        for (var i = 0; i < 1e7; i++) {
-            if ((new Date().getTime() - start) > milliseconds){
-            break;
-            }
-        }
-        }
-
     var q_no = 1;
     function addQ(){
         const f = document.createElement("form");
         f.id = "f"+ q_no;
         f.name="form"+q_no;
-        f.method="post";
-        f.action="{{url_for('add_paper')}}";
-        function handleForm(event) { event.preventdefault(); f.submit();  alert(f.name + "submitted"); }
-        // f.addEventListener('onsubmit', handleForm);
-        f.onsubmit = handleForm;
-        // f.submit(function(event){
-        // event.preventDefault();
-        // console.log(f.name + "submitted")
-        // f.submit();
-        // })
+        
 
         const q = document.createElement("textarea");
         q.id = "q"+q_no;
-        q.name = "q"+q_no;
+        q.name = "q";
         q.placeholder = "Type your question here";
         q.rows="5";
         q.cols="40";
@@ -149,9 +142,9 @@ Create Paper
 
         const a = document.createElement("textarea")
         a.id = "A"+q_no;
-        a.name = "A"+q_no;
+        a.name = "A";
         a.placeholder="Option 1";
-        a.rows="3";
+        a.rows="2";
         a.cols="20";
 
         const la = document.createElement("label");
@@ -160,9 +153,9 @@ Create Paper
 
         const b = document.createElement("textarea")
         b.id = "B"+q_no;
-        b.name = "B"+q_no;
+        b.name = "B";
         b.placeholder="Option 2";
-        b.rows="3";
+        b.rows="2";
         b.cols="20";
 
         const lb = document.createElement("label");
@@ -171,9 +164,9 @@ Create Paper
 
         const c = document.createElement("textarea")
         c.id = "C"+q_no;
-        c.name = "C"+q_no;
+        c.name = "C";
         c.placeholder="Option 3";
-        c.rows="3";
+        c.rows="2";
         c.cols="20";
 
         const lc = document.createElement("label");
@@ -182,9 +175,9 @@ Create Paper
 
         const d = document.createElement("textarea")
         d.id = "D"+q_no;
-        d.name = "D"+q_no;
+        d.name = "D";
         d.placeholder="Option 4";
-        d.rows="3";
+        d.rows="2";
         d.cols="20";
 
         const ld = document.createElement("label");
@@ -194,7 +187,7 @@ Create Paper
         const correct_ans = document.createElement("input")
         correct_ans.type = "text";
         correct_ans.id = "correct_ans"+q_no;
-        correct_ans.name = "c_ans"+q_no;
+        correct_ans.name = "c_ans";
         correct_ans.placeholder="A,B,C,D";
 
         const lca = document.createElement("label");
@@ -204,9 +197,10 @@ Create Paper
         const marks = document.createElement("input")
         marks.type = "number";
         marks.id = "marks"+q_no;
-        marks.name = "marks"+q_no;
+        marks.name = "marks";
         marks.placeholder="marks";
         marks.defaultValue=0;
+        marks.onchange = calc_marks
 
         const lm = document.createElement("label");
         lm.htmlFor="marks"+q_no;
