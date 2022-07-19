@@ -3,15 +3,30 @@
 
 {% block content %}
 <!-- <div align="center"> -->
-<h1 style="margin-top: 100px" align="center">Welcome to Online Examination Portal!</h1>
+<h1 style="margin-top: 70px" align="center">Welcome to Online Examination Portal!</h1>
 <!-- </div> -->
-<div class="container p-5 w-25 btn-group-vertical d-flex align-items-center justify-content-center">
-  <a class="btn btn-primary btn-lg " style="background-color: #6e95eb" href="{{ url_for('login', type='Student') }}"
-    role="button">Student Login</a>
-  <a class="btn btn-primary btn-lg " style="background-color: #de5555" href="{{ url_for('login', type='IC') }}"
-    role="button">Instructor Login</a>
-  <a class="btn btn-primary btn-lg " style="background-color: #4a9f64" href="{{ url_for('login', type='Admin') }}"
-    role="button">Admin Login</a>
-</div>
 
+  <div class="card-group container" style="width:40%; margin-top: 50px;">
+    <div class="card bg-dark ps-1 pt-1 border-dark rounded-left">
+      <img src="{{ url_for('img', filename='student.jpg') }}" class="card-img-top" alt="student">
+      <div class="card-body text-bg-dark">
+        <h5 class="card-title text-center">Student Login</h5>
+        <a href="{{ url_for('login', type='Student') }}" class="stretched-link"></a>
+      </div>
+    </div>
+
+    <div class="card bg-dark pe-1 pt-1 border-dark rounded-right" >
+      <img src="{{ url_for('img', filename='Professor.jpg') }}" class="card-img-top" alt="professor">
+      <div class="card-body text-bg-dark">
+        <h5 class="card-title text-center">Instructor Login</h5>
+        <a href="{{ url_for('login', type='IC') }}" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+  document.getElementById('nav1').style.display='none';
+  document.getElementById('nav2').style.display='none';
+</script>
 {% endblock content %}

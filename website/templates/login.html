@@ -2,46 +2,35 @@
 {% block title %}{{log_type}} Login{% endblock title %}
 
 {% block content %}
-<h1 style="margin-top: 100px" align="center">{{ log_type }} Login</h1>
-<section class="vh-10">
-    <div class="container-fluid h-custom">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-md-9 col-lg-6 col-xl-5">
-                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-                    class="img-fluid" alt="Sample image">
-            </div>
-            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <div type="margin-top:200px" align="center">
-                    <form method="POST" action="{{url_for('verify', log_type=log_type)}}">
-                        <!-- UserID input -->
-                        <div class="form-outline mb-4">
-                            <input type="text" name="ID" class="form-control form-control-lg"
-                                placeholder="Enter UserID" />
-                        </div>
-
-                        <!-- Password input -->
-                        <div class="form-outline mb-3">
-                            <input type="password" name="passw" class="form-control form-control-lg"
-                                placeholder="Enter password" />
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="#!" class="text-body">Forgot password?</a>
-                        </div>
-
-                        <div class="text-center text-lg-start mt-4 pt-2">
-                            <button type="submit" class="btn btn-primary btn-lg"
-                                style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
-                            <!-- <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="#!"
-                                class="link-danger">Register</a></p> -->
-                        </div>
-
-                    </form>
-                </div>
-            </div>
+<h1 style="margin-top: 70px" align="center">{{ log_type }} Login</h1>
+<div class="container" style="width:40%; margin-top: 50px;">
+    
+    <form method="POST" action="{{url_for('verify', log_type=log_type)}}">
+        <!-- UserID input -->
+        <div class="form-outline mt-4">
+            <input type="text" name="ID" class="form-control form-control-lg"
+                placeholder="Enter UserID" />
         </div>
 
-</section>
+        <!-- Password input -->
+        <div class="form-outline mt-4">
+            <input type="password" name="passw" class="form-control form-control-lg"
+                placeholder="Enter password" />
+        </div>
+
+        <div class="d-flex justify-content-between align-center mt-3">
+            <a href="#!" class="text-body">Forgot password?</a>
+        </div>
+
+        <div class="text-center text-lg-center mt-4 pt-2">
+            <button type="submit" class="btn btn-primary btn-lg"
+                style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+            <!-- <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="#!"
+                class="link-danger">Register</a></p> -->
+        </div>
+
+    </form>
+</div>
 <!-- <div align="center">
         <a href="{{url_for('reset_passw')}}">Forgot password?</a>
     </div> -->

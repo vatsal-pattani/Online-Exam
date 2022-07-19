@@ -8,7 +8,7 @@ View Questions
 <p>Maximum Marks: {{tm}}</p><br>
 
 {% for question in questions %}
-<p>{{question[6]}}. {{question[1]}} Marks:{{question[0]}}</p>
+<p name="q_no">. {{question[1]}} Marks:{{question[0]}}</p>
 {% for i in range(2,6) %}
 <input type="radio" disabled>{{question[i]}}<br>
 {% endfor %}
@@ -17,4 +17,15 @@ View Questions
 <br>
 <button type="button" onclick="window.location.href='{{url_for('leaderboard')}}';">Leaderboard</button>
 <button type="button" onclick="window.location.href='{{url_for('dashboard')}}';">Go to Dashboard</button>
+
+<script>
+    var q_no=0;
+    function ques_no(){
+        let pTags = document.getElementsByName('q_no');
+        for(var i=0; i<pTags.length; i++){
+            pTags[i].innerHTML = "Q" + (++q_no) + pTags[i].innerHTML;
+        }
+    }
+    ques_no();
+</script>
 {% endblock content%}

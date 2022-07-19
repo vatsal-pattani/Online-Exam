@@ -1,12 +1,14 @@
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from .users import *
 from dotenv import load_dotenv
+import os
 
 load_dotenv()  # take environment variables from .env.
 
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'img')
 app.config['SECRET_KEY'] = "fnvmkalbguipaehf"
 
 if __name__ == '__main__':
@@ -63,25 +65,29 @@ def dashboard():
     ID = session['ID']
     # getCourses is unnecessary function. We can do it just by execute
     courses = getCourses(ID)
-    return render_template("dashboard.html", courses=courses)
+    print("session")
+    print(session)
+    S_name = execute(f'''select S_id,S_Name 
+             from Student as temp_s 
+             where (S_id = '{ID}');''')[0][1]
+    return render_template("dashboard.html", courses=courses, S_name=S_name)
 
 
 @app.route('/papers', methods=['GET', 'POST'])
 def papers():
-    subject = request.form.get('subject')
-    subject = subject.split(' : ')[0]
+    subject = request.args.get('subject')
     session['subject'] = subject
     c_id = execute(
         f'''select C_id from course where (title = '{subject}'); ''')
     session['c_id'] = c_id[0][0]
     papers = execute(
         f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{c_id[0][0]}'); ''')
-    return render_template('papers.html', papers=papers)
+    return render_template('papers.html', papers=papers, subject=subject)
 
 
 @app.route('/questions', methods=['GET', 'POST'])
 def questions():
-    E_id = request.form.get('E_id')
+    E_id = request.args.get('E_id')
     session['E_id'] = E_id
 
     # First check if the student has already attempted this paper
@@ -103,7 +109,8 @@ def questions():
     questions = execute(
         f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
 
-    return render_template("questions.html", questions=questions, tm=total_marks)
+
+    return render_template("questions.html", questions=questions, tm=total_marks, duration = request.args.get('duration'))
 
 
 @app.route('/result', methods=['GET', 'POST'])
@@ -162,9 +169,10 @@ def result():
         query += ";"  # Adding one semicolon
         execute(query)    # This saves Response in db
 
+        time_taken = request.form.get('tt')
         # Now We have to add these obtined marks to Result table. Keeping time taken as 0 for now
         execute(f'''insert into Result(E_id, C_id, S_id, marks, time_taken)
-                    values ('{session['E_id']}','{session['c_id']}','{ID}',{obtained_marks},0); ''')
+                    values ('{session['E_id']}','{session['c_id']}','{ID}',{obtained_marks},{time_taken}); ''')
 
     else:
         # Fetch student's result from database
@@ -173,8 +181,9 @@ def result():
 
         print("Result from db: ", result)
         obtained_marks = result[0][0]
+        time_taken = result[0][1]
         session['obtained_marks'] = obtained_marks
-    return render_template("result.html", om=obtained_marks, tm=total_marks)
+    return render_template("result.html", om=obtained_marks, tm=total_marks, tt = time_taken)
 
 
 @app.route('/view_response')
@@ -188,16 +197,21 @@ def response():
     given_ans = execute(f'''select response from response 
                     where response.s_id='{session['ID']}' and response.Q_id in 
                     (select Q_id from Questions where (Questions.E_id='{session['E_id']}') and (Questions.c_id='{session['c_id']}'));''')
-    print(given_ans)
-
-    return render_template('view_r.html', questions=questions, given_ans=given_ans, tm=session['total_marks'], om=session['obtained_marks'], zip=zip, range=range)
+    
+    result = execute(
+            f'''select time_taken from Result where (Result.C_id = '{session['c_id']}') and (Result.S_id = '{session['ID']}') and (Result.E_id = '{session['E_id']}'); ''')
+    time_taken = result[0][0]
+    return render_template('view_r.html', questions=questions, given_ans=given_ans, tm=session['total_marks'], om=session['obtained_marks'], zip=zip, range=range, tt = time_taken)
 
 
 @app.route('/leaderboard')
 def leaderboard():
     LeadBoard = execute(
-        f'''select S_id,marks,time_taken from Result where (Result.C_id = '{session['c_id']}') and (Result.E_id = '{session['E_id']}') order by Marks desc, time_taken asc;  -- Displays leaderboard for this test ''')
-    return render_template('Leaderboard.html', lb=LeadBoard, subject=session['subject'], paper=session['E_id'], tm=session['total_marks'])
+        f'''select S_id,S_name,marks,time_taken 
+            from (Result natural join student)
+            where (Result.C_id = '{session['c_id']}') and (Result.E_id = '{session['E_id']}') order by Marks desc, time_taken asc;  -- Displays leaderboard for this test ''')
+    print(LeadBoard)
+    return render_template('Leaderboard.html', lb=LeadBoard, subject=session['subject'], paper=session['E_id'], tm=session['total_marks'], zip=zip, S_id = session['ID'])
 
 
 @app.route('/Log Out')
@@ -210,6 +224,7 @@ def logout():
 def IC_dashboard():
     # We have ID and log_type at this point
     # Now we have to fetch all info of his course
+    print(session['ID'])
     IC_info = execute(f'''select IC_Name,title,C_id 
                     from Course 
                     where (IC_id = '{session['ID']}'); ''')[0]
@@ -221,7 +236,7 @@ def IC_dashboard():
     papers = execute(
         f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{session['c_id']}'); ''')
 
-    return render_template("IC_dashboard.html", IC_info=IC_info, papers=papers)
+    return render_template("IC_dashboard.html", IC_info=IC_info, papers=papers, subject=course_name)
 
 
 @app.route('/view_paper')
@@ -290,3 +305,11 @@ def edit_paper(E_id):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.route('/img/<path:filename>')
+def img(filename):
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'],
+        filename,
+        as_attachment=True
+    )

@@ -5,21 +5,52 @@ Leaderboard
 
 {% block content %}
 
-<h1>{{subject}}: Leaderboard</h1>
-<p>Maximum marks: {{tm}}</p>
-<table>
-    <tr>
-        <th>Student id</th>
-        <th>Marks obtained</th>
-        <th>Time Taken</th>
-    </tr>
-    {% for e in lb %}
+<div class="container mt-4" style="max-width: 60%;">
+    <h1>{{subject}}: Leaderboard</h1>
+    <h5>Paper ID: {{paper}}</h5>
+    <h6>Maximum marks: {{tm}}</h6>
+    <hr>
+    <table class="table table-striped">
         <tr>
-            <td>{{e[0]}}</td>
-            <td>{{e[1]}}</td>
-            <td>{{e[2]}}</td>
+            <th>Rank</th>
+            <th id="student_id" name="{{S_id}}">Student id</th>
+            <th>Name</th>
+            <th>Marks obtained</th>
+            <th>Time Taken</th>
         </tr>
-    {% endfor %}
-</table>
+        {% for e in lb %}
+            <tr>
+                <td name="rank"></td>
+                <td name="S_id">{{e[0]}}</td>
+                <td>{{e[1]}}</td>
+                <td>{{e[2]}}</td>
+                <td>{{e[3]}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
 
+<script>
+    var rank=1;
+    function ranker(){
+        var ranks = document.getElementsByName('rank')
+        for(let i=0; i<ranks.length ;i++){
+            ranks[i].innerHTML = rank + ".";
+            rank++;
+        }
+        
+    }
+    ranker();
+
+    function locator(){
+        var S_id = document.getElementById('student_id').getAttribute('name');
+        var S_ids = document.getElementsByName('S_id');
+        for(var i=0; i<S_ids.length; i++){
+            if(S_id === S_ids[i].innerHTML)
+                S_ids[i].parentNode.setAttribute('class', 'table table-dark');
+        }
+        
+    }
+    locator();
+</script>
 {% endblock content %}

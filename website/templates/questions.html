@@ -5,17 +5,118 @@ Questions
 {% endblock title %}
 
 {% block content%}
-<p>Maximum Marks: {{tm}}</p>
-<form action="{{url_for('result')}}" method="post">
-{% for question in questions %}
-    <p>{{question[-2]}}.  {{question[1]}} Marks:{{question[0]}}</p>
-    <input type="radio" name="{{question[-2]}}" value="A">{{question[2]}}<br>
-    <input type="radio" name="{{question[-2]}}" value="B">{{question[3]}}<br>
-    <input type="radio" name="{{question[-2]}}" value="C">{{question[4]}}<br>
-    <input type="radio" name="{{question[-2]}}" value="D">{{question[5]}}<br>
-    <input type="radio" name="{{question[-2]}}" value="None" checked>None<br>   <!--A bit confused about this-->
-{% endfor %}
-    <br>
-    <input type="submit">
-</form>
+
+<div class="container-fluid my-4"">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <div class="card border-dark">
+                <div class="card body"></div>
+                <h5 class="m-2 mb-0 card-title" id="timer" name="{{duration}}">Timer: {{duration}}</h5>
+                <hr>
+                <div class="card-text mb-2">
+                    <h7 class="ms-2" id="q_attempt"></h7><br>
+                    <h7 class="ms-2" id="m_attempt"></h7>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="col-sm-9 col-sm-offset-3 main">
+            <h6>Maximum Marks: {{tm}}</h6>
+            <hr>
+            <form action="{{url_for('result')}}" method="post" id="form">
+                {% for question in questions %}
+                <div class="card border-dark mb-4">
+                    <h4 class="card-title p-3 pb-0" name="q_no">.  {{question[1]}}</h4>
+                    <hr class="m-1">
+                    <div class="card-body" name="options">
+                        <input class="m-2" type="radio" name="{{question[-2]}}" value="A" onchange="attempt()">{{question[2]}}<br>
+                        <input class="m-2" type="radio" name="{{question[-2]}}" value="B" onchange="attempt()">{{question[3]}}<br>
+                        <input class="m-2" type="radio" name="{{question[-2]}}" value="C" onchange="attempt()">{{question[4]}}<br>
+                        <input class="m-2" type="radio" name="{{question[-2]}}" value="D" onchange="attempt()">{{question[5]}}<br>
+                        <input class="m-2" type="radio" name="{{question[-2]}}" value="None" checked id="{{question[0]}}" onchange="attempt()">None<br>   <!--A bit confused about this-->
+                    </div>
+                    <div class="card-footer text muted m-0 fw-bolder">
+                        Marks: {{question[0]}}
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="m-2 ms-0">
+                    <input type="submit" class="btn btn-primary btn-lg" role="button">
+                </div>
+                <input type="text" id="tt" name = "tt" hidden>
+            </form>
+
+        </div>
+    </div>
+</div>    
+
+<script>
+    var q_no=0;
+    function ques_no(){
+        let pTags = document.getElementsByName('q_no');
+        for(var i=0; i<pTags.length; i++){
+            pTags[i].innerHTML = "Q" + (++q_no) + pTags[i].innerHTML;
+        }
+        var temp1 = "0/" + q_no;
+        var temp2 = "0/" + "{{tm}}"
+        temp1 = temp1.bold();
+        temp2 = temp2.bold();
+
+        document.getElementById('q_attempt').innerHTML = "Questions attempted: " + temp1;
+        document.getElementById('m_attempt').innerHTML = "Marks attempted: " + temp2;
+    }
+    ques_no();
+    function attempt(){
+        var q_attempted = 0;
+        var m_attempted = 0;
+        var options = document.getElementsByName('options');
+        for(var i=0; i<options.length; i++){
+            var n_node = options[i].childNodes[17];
+            console.log(n_node);
+            if(n_node.checked){
+                console.log(' None ');
+            }
+            else{
+                console.log(' Option Chosen ');
+                q_attempted++;
+                m_attempted += parseFloat(n_node.id);
+            }
+        }
+        // console.log(options);
+        var temp1 = q_attempted + "/" + q_no;
+        var temp2 = m_attempted + "/" + "{{tm}}"
+        temp1 = temp1.bold();
+        temp2 = temp2.bold();
+        document.getElementById('q_attempt').innerHTML = "Questions attempted: " + temp1;
+        document.getElementById('m_attempt').innerHTML = "Marks attempted: " + temp2;
+    }
+    
+    var timer = document.getElementById('timer');
+    var temp = (timer.getAttribute('name')).split(':');
+    var seconds = parseInt(temp[0])*3600 + parseInt(temp[1])*60 + parseInt(temp[2]);
+    const total_t = seconds;
+
+    setInterval(updateCount, 1000);
+
+    function updateCount(){
+        if(seconds <= 0)document.getElementById('form').submit();
+        let hh = Math.floor(seconds/3600);
+        let mm = Math.floor((seconds%3600)/60);
+        let ss = Math.floor((seconds%3600)%60);        
+
+        if(hh < 10 )hh = "0"+hh;
+        if(mm < 10 )mm = "0"+mm;
+        if(ss < 10 )ss = "0"+ss;
+
+        if(seconds<=120)timer.style="color: red";
+
+        timer.innerHTML = "Timer: " + hh + ":" + mm + ":" + ss;
+        document.getElementById('tt').value = total_t - seconds;
+        seconds--;
+
+    }
+
+</script>
 {% endblock content%}

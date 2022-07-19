@@ -4,11 +4,42 @@ Dashboard
 {% endblock title %}
 
 {% block content %}
-<form action="{{url_for('papers')}}" method="post">
-{% for course in courses %}
-    <input type="submit" value="{{course[0]}} : {{course[1]}}" name="subject"><br>
-    <br>
+<div class="container" style="width:70%; margin-top: 50px;">
+    <div>
+        <h3 class="display-5">{{S_name}}'s Dashboard</h3>
+    </div>
+    <hr class="mt-2">
 
-{% endfor %}
-</form>
+    <div class="row row-cols-3">
+            {% for course in courses %}
+            <div class="col">
+                <div class="card bg-warning border-dark" name="c_title" id="{{course[0]}}">
+                    <img src="" class="card-img-top mb-0" alt="{{course[0]}}">
+                    <div class="card-body text-bg-dark" style="height:5rem">
+                        <h5 class="card-title text-center">{{course[0]}}</h5>
+                        <p class="card-text text-center mt-0">{{course[1]}}</p>
+                        <a href="{{url_for('papers', subject=course[0])}}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+                
+                <br>
+
+            {% endfor %}
+        </form>
+    </div>
+    
+</div>
+<script>
+    getImage();
+    function getImage(){
+        var arr = document.getElementsByName('c_title');
+        for(var i=0; i<arr.length; i++){
+            console.log(arr[i].id);
+            let server = "http://127.0.0.1:8887/"
+            let imgName = server + arr[i].id + ".jpg";
+            arr[i].getElementsByTagName('img')[0].src = imgName;
+        }
+    }
+</script>
 {% endblock content %}
