@@ -14,7 +14,7 @@ Dashboard
             {% for course in courses %}
             <div class="col">
                 <div class="card bg-warning border-dark" name="c_title" id="{{course[0]}}">
-                    <img src="" class="card-img-top mb-0" alt="{{course[0]}}">
+                    <img src="{{ url_for('img', filename= course[0] + '.jpg') }}" class="card-img-top mb-0" alt="{{course[0]}}">
                     <div class="card-body text-bg-dark" style="height:5rem">
                         <h5 class="card-title text-center">{{course[0]}}</h5>
                         <p class="card-text text-center mt-0">{{course[1]}}</p>
@@ -30,16 +30,4 @@ Dashboard
     </div>
     
 </div>
-<script>
-    getImage();
-    function getImage(){
-        var arr = document.getElementsByName('c_title');
-        for(var i=0; i<arr.length; i++){
-            console.log(arr[i].id);
-            let server = "http://127.0.0.1:8887/"
-            let imgName = server + arr[i].id + ".jpg";
-            arr[i].getElementsByTagName('img')[0].src = imgName;
-        }
-    }
-</script>
 {% endblock content %}
