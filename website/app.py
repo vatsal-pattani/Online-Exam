@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from .users import *
 from dotenv import load_dotenv
@@ -18,7 +17,6 @@ if __name__ == '__main__':
 
 @app.route('/')
 def home():
-    print("home")
     return render_template('home.html')
 
 
@@ -109,8 +107,7 @@ def questions():
     questions = execute(
         f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
 
-
-    return render_template("questions.html", questions=questions, tm=total_marks, duration = request.args.get('duration'))
+    return render_template("questions.html", questions=questions, tm=total_marks, duration=request.args.get('duration'))
 
 
 @app.route('/result', methods=['GET', 'POST'])
@@ -183,7 +180,7 @@ def result():
         obtained_marks = result[0][0]
         time_taken = result[0][1]
         session['obtained_marks'] = obtained_marks
-    return render_template("result.html", om=obtained_marks, tm=total_marks, tt = time_taken)
+    return render_template("result.html", om=obtained_marks, tm=total_marks, tt=time_taken)
 
 
 @app.route('/view_response')
@@ -197,11 +194,11 @@ def response():
     given_ans = execute(f'''select response from response 
                     where response.s_id='{session['ID']}' and response.Q_id in 
                     (select Q_id from Questions where (Questions.E_id='{session['E_id']}') and (Questions.c_id='{session['c_id']}'));''')
-    
+
     result = execute(
-            f'''select time_taken from Result where (Result.C_id = '{session['c_id']}') and (Result.S_id = '{session['ID']}') and (Result.E_id = '{session['E_id']}'); ''')
+        f'''select time_taken from Result where (Result.C_id = '{session['c_id']}') and (Result.S_id = '{session['ID']}') and (Result.E_id = '{session['E_id']}'); ''')
     time_taken = result[0][0]
-    return render_template('view_r.html', questions=questions, given_ans=given_ans, tm=session['total_marks'], om=session['obtained_marks'], zip=zip, range=range, tt = time_taken)
+    return render_template('view_r.html', questions=questions, given_ans=given_ans, tm=session['total_marks'], om=session['obtained_marks'], zip=zip, range=range, tt=time_taken)
 
 
 @app.route('/leaderboard')
@@ -211,7 +208,7 @@ def leaderboard():
             from (Result natural join student)
             where (Result.C_id = '{session['c_id']}') and (Result.E_id = '{session['E_id']}') order by Marks desc, time_taken asc;  -- Displays leaderboard for this test ''')
     print(LeadBoard)
-    return render_template('Leaderboard.html', lb=LeadBoard, subject=session['subject'], paper=session['E_id'], tm=session['total_marks'], zip=zip, S_id = session['ID'])
+    return render_template('Leaderboard.html', lb=LeadBoard, subject=session['subject'], paper=session['E_id'], tm=session['total_marks'], zip=zip, S_id=session['ID'])
 
 
 @app.route('/Log Out')
@@ -251,24 +248,23 @@ def view_paper():
     questions = execute(
         f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{E_id}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
 
-    total_marks = execute(f'''select total_marks from Exam
-                              where E_id='{E_id}' and C_id='{session['c_id']}' ''')[0][0]
-    session['total_marks'] = total_marks
-    print(total_marks)
-    return render_template("questions_IC.html", questions=questions, tm=total_marks)
-    
+    exam_info = execute(f'''select total_marks, duration from Exam
+                              where E_id='{E_id}' and C_id='{session['c_id']}' ''')[0]
+
+    session['total_marks'] = exam_info[0]
+    return render_template("questions_IC.html", questions=questions, tm=exam_info[0], duration=exam_info[1])
 
 
 @app.route('/create_paper', methods=['GET', 'POST'])
 def create_paper():
-# First we will have to generate new E_id for this c_id, we'll have to refer to db for that
+    # First we will have to generate new E_id for this c_id, we'll have to refer to db for that
     last_eid = execute(f'''select E_id from exam
                 where exam.c_id = '{session['c_id']}'
                 order by E_id desc
                 limit 1''')[0][0]
     new_eid = "e" + str(int(last_eid[1:]) + 1).zfill(5)   # Creating a new e_id
     session['new_eid'] = new_eid
-    
+
     return render_template("create_paper.html", session=session)
 
 
@@ -286,6 +282,7 @@ def add_question():  # This will add paper to db
                 values ('{new_qid}',{int(form['marks'])},'{form['q']}', '{form['A']}','{form['B']}','{form['C']}','{form['D']}','{form['c_ans']}','{session['new_eid']}','{session['c_id']}'); ''')
     return "Question added successfully"
 
+
 @app.route('/add_exam', methods=['POST'])
 def add_exam():
     # print("We're in add exam!")
@@ -302,9 +299,11 @@ def edit_paper(E_id):
     print(E_id)
     return "Here you edit the paper"
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 @app.route('/img/<path:filename>')
 def img(filename):

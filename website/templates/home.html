@@ -3,30 +3,29 @@
 
 {% block content %}
 <!-- <div align="center"> -->
+<script>
+  document.getElementsByTagName('nav')[0].style.display = 'none';
+</script>
+
 <h1 style="margin-top: 70px" align="center">Welcome to Online Examination Portal!</h1>
 <!-- </div> -->
 
-  <div class="card-group container" style="width:40%; margin-top: 50px;">
-    <div class="card bg-dark ps-1 pt-1 border-dark rounded-left">
-      <img src="{{ url_for('img', filename='student.jpg') }}" class="card-img-top" alt="student">
-      <div class="card-body text-bg-dark">
-        <h5 class="card-title text-center">Student Login</h5>
-        <a href="{{ url_for('login', type='Student') }}" class="stretched-link"></a>
-      </div>
-    </div>
-
-    <div class="card bg-dark pe-1 pt-1 border-dark rounded-right" >
-      <img src="{{ url_for('img', filename='Professor.jpg') }}" class="card-img-top" alt="professor">
-      <div class="card-body text-bg-dark">
-        <h5 class="card-title text-center">Instructor Login</h5>
-        <a href="{{ url_for('login', type='IC') }}" class="stretched-link"></a>
-      </div>
+<div class="card-group container w-50 mt-5">
+  <div class="card bg-dark ps-1 pt-1 border-light rounded-left">
+    <img src="{{ url_for('img', filename='student.jpg') }}" class="card-img-top" alt="student">
+    <div class="card-body text-bg-dark">
+      <h5 class="card-title text-center">Student Login</h5>
+      <a href="{{ url_for('login', type='Student') }}" class="stretched-link"></a>
     </div>
   </div>
 
+  <div class="card bg-dark pe-1 pt-1 border-light rounded-right">
+    <img src="{{ url_for('img', filename='Professor.jpg') }}" class="card-img-top" alt="professor">
+    <div class="card-body text-bg-dark">
+      <h5 class="card-title text-center">Instructor Login</h5>
+      <a href="{{ url_for('login', type='IC') }}" class="stretched-link"></a>
+    </div>
+  </div>
+</div>
 
-<script>
-  document.getElementById('nav1').style.display='none';
-  document.getElementById('nav2').style.display='none';
-</script>
 {% endblock content %}
