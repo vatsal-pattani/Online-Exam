@@ -9,7 +9,7 @@ def connect():
             host="localhost",
             port="3306",
             user="root",
-            passwd=os.environ.get("DBS_VI_PASSWORD", "vatsal"),
+            passwd=os.environ.get("DBS_VI_PASSWORD"),
             database="dbs_vi"
         )
         return mydb

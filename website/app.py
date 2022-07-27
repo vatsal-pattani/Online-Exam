@@ -8,7 +8,7 @@ load_dotenv()  # take environment variables from .env.
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'img')
-app.config['SECRET_KEY'] = "fnvmkalbguipaehf"
+app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
 
 if __name__ == '__main__':
     app.run(debug=True)
