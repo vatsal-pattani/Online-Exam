@@ -6,36 +6,35 @@ View Questions
 
 {% block content%}
 
-<div class="container-fluid">
-    <div class="sidebar col-2">
-        <div class="card border-dark">
-            <p class="card-text mx-2 my-2" id="tot_time">Total Time: {{duration}}</p>
-            <p class="card-text mx-2 my-2" id="num_ques">No. of Questions: {{questions|length}}</p>
-            <p class="card-text mx-2 my-2" id="tot_marks">Total Marks: {{tm}}</p>
-        </div>
-    </div>
-
-    <div class="col-9 mt-3 offset-2 mr-2">
-        {% for question in questions %}
-        <div class="card border-dark mb-4">
-            <div class="card-body">
-                <h4 name="q_no"> {{question[1]}}</h4>
-                <hr>
-                {% for i in range(2,6) %}
-                <div>
-                    <input type="radio" class="m-2" disabled> {{question[i]}}
-                </div>
-                {% endfor %}
-                <p class="mb-0">Correct Ans: {{question[-1]}}</p>
-            </div>
-            <div class="card-footer">Marks: {{question[0]}}</div>
-        </div>
-        {% endfor %}
-        <button class="btn btn-primary mb-3"
-            onclick="window.location.href='{{url_for('leaderboard')}}';">Leaderboard</button>
-        <button class="btn btn-primary mb-3" onclick="window.location.href='{{url_for('IC_dashboard')}}';">Go to
-            Dashboard</button>
+<div class="sidebar col-2">
+    <div class="card border-dark">
+        <p class="card-text mx-2 my-2" id="tot_time">Total Time: {{duration}}</p>
+        <p class="card-text mx-2 my-2" id="num_ques">No. of Questions: {{questions|length}}</p>
+        <p class="card-text mx-2 my-2" id="tot_marks">Total Marks: {{tm}}</p>
     </div>
 </div>
+
+<div class="col-9 mt-3 offset-2 mr-2">
+    {% for question in questions %}
+    <div class="card border-dark mb-4">
+        <div class="card-body">
+            <h4 name="q_no"> {{question[1]}}</h4>
+            <hr>
+            {% for i in range(2,6) %}
+            <div>
+                <input type="radio" class="m-2" disabled> {{question[i]}}
+            </div>
+            {% endfor %}
+            <p class="mb-0">Correct Ans: {{question[-1]}}</p>
+        </div>
+        <div class="card-footer">Marks: {{question[0]}}</div>
+    </div>
+    {% endfor %}
+    <button class="btn btn-primary mb-3"
+        onclick="window.location.href='{{url_for('leaderboard')}}';">Leaderboard</button>
+    <button class="btn btn-primary mb-3" onclick="window.location.href='{{url_for('IC_dashboard')}}';">Go to
+        Dashboard</button>
+</div>
+
 <!-- <script src="{{url_for('static', filename='questions_ic.js')}}"></script> -->
 {% endblock content%}
