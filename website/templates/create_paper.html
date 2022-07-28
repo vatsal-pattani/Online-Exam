@@ -6,81 +6,90 @@ Create Paper
 
 {% block content%}
 
-<div class="sidebar col-2">
-    <div class="card border-dark">
-        <div class="card-body">
-            <form id="0" method="post" action="{{url_for('add_exam')}}" name="basic_info">
-                <div class="mb-2">
-                    <label class="form-label" for="total_marks">Total Marks: </label>
-                    <input class="form-control" value="0" name="total_marks" id="total_marks" readonly>
-                </div>
+<!-- Question Format -->
+<div class="card card-body border-dark mb-3 d-none" id="defaultQ">
+    <div class="input-group mb-2">
+        <label class="input-group-text" for="q">Q</label>
+        <textarea name="q" id="q" class="form-control" rows="2" placeholder="Type your question here"></textarea>
 
-                <label class="form-label" for="duration">Duration: </label>
-                <div class="input-group mb-2" id="duration">
-                    <input class="form-control" type="number" name="hours" id="hours" placeholder="HH" min="0">
-                    <input class="form-control" type="number" name="mins" id="mins" placeholder="MM" min="0">
-                </div>
+    </div>
 
-                <div>
-                    <label class="form-label" for="start_time">Start Time: </label>
-                    <input class="form-control" type="datetime-local" name="start_time" id="start_time"
-                        onclick="set_today()">
-                </div>
-            </form>
+    <div class="input-group">
+        <label class="input-group-text bg-white" for="A">A</label>
+        <textarea name="" id="A" class="form-control" rows="1" placeholder="Option 1"></textarea>
+    </div>
+    <div class="input-group">
+        <label class="input-group-text bg-white" for="B">B</label>
+        <textarea name="" id="B" class="form-control" rows="1" placeholder="Option 2"></textarea>
+    </div>
+    <div class="input-group">
+        <label class="input-group-text bg-white" for="C">C</label>
+        <textarea name="" id="C" class="form-control" rows="1" placeholder="Option 3"></textarea>
+    </div>
+    <div class="input-group mb-2">
+        <label class="input-group-text bg-white" for="D">D</label>
+        <textarea name="" id="D" class="form-control" rows="1" placeholder="Option 4"></textarea>
+    </div>
+
+    <div class="row g-3">
+        <div class="col">
+            <label for="correct_ans">Correct Answer</label>
+            <select id="correct_ans" name="" class="form-select">
+                <option value="" hidden>Select an option</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
+        <div class="col">
+            <label for="marks">Marks</label>
+            <input type="number" name="" id="marks" min="0" class="form-control" placeholder="Marks"
+                onchange="calcMarks()">
         </div>
     </div>
 </div>
 
+<form id="question_form" action="{{url_for('add_exam')}}" method="post">
+    <div class="sidebar col-2 card card-body border-0">
+        <!-- <form id="basic_info" name="basic_info"> -->
+        <div class="mb-2">
+            <label class="form-label" for="total_marks">Total Marks: </label>
+            <input class="form-control" value="0" name="total_marks" id="total_marks" readonly>
+        </div>
+
+        <label class="form-label" for="duration">Duration: </label>
+        <div class="input-group mb-2" id="duration">
+            <input class="form-control" type="number" name="hours" id="hours" placeholder="HH" min="0" required>
+            <input class="form-control" type="number" name="mins" id="mins" placeholder="MM" min="0" required>
+        </div>
+
+        <div>
+            <label class="form-label" for="start_time">Start Time: </label>
+            <input class="form-control" type="datetime-local" name="start_time" id="start_time" onclick="set_today()"
+                required>
+        </div>
+        <!-- </form> -->
+    </div>
 
 
-<div class="col-9 mt-3 offset-2 mr-2">
-    <div id="questions">
-        <form>
-            <div class="card card-body border-dark mb-3" id="1">
-                <div class="input-group mb-2">
-                    <label class="input-group-text" for="q1">Q1</label>
-                    <textarea name="q1" id="q1" class="form-control" rows="2"
-                        placeholder="Type your question here"></textarea>
-                </div>
 
-                <div class="input-group">
-                    <label class="input-group-text bg-white" for="A">A</label>
-                    <textarea name="q1" id="A1" class="form-control" rows="1" placeholder="Option 1"></textarea>
-                </div>
-                <div class="input-group">
-                    <label class="input-group-text bg-white" for="A">B</label>
-                    <textarea name="q1" id="B1" class="form-control" rows="1" placeholder="Option 2"></textarea>
-                </div>
-                <div class="input-group">
-                    <label class="input-group-text bg-white" for="A">C</label>
-                    <textarea name="q1" id="C1" class="form-control" rows="1" placeholder="Option 3"></textarea>
-                </div>
-                <div class="input-group mb-2">
-                    <label class="input-group-text bg-white" for="A">D</label>
-                    <textarea name="q1" id="D1" class="form-control" rows="1" placeholder="Option 4"></textarea>
-                </div>
 
-                <div class="row g-3">
-                    <div class="col">
-                        <label for="correct_ans1">Correct Answer</label>
-                        <input name="c_ans" id="correct_ans1" class="form-control" placeholder="A,B,C,D">
-                    </div>
-                    <div class="col">
-                        <label for="marks1">Marks</label>
-                        <input type="number" name="marks" id="marks1" class="form-control" placeholder="Marks"
-                            defaultValue=0 onchange="calc_marks"></textarea>
-                    </div>
-                </div>
-            </div>
-        </form>
+    <div class="col-9 my-3 offset-2 mr-2">
+        <!-- <form id="question_form" action="{{url_for('add_exam')}}" method="post"> -->
+        <!-- Do not change order of divs -->
+        <div id="questions">
+
+        </div>
+        <!-- </form> -->
+        <button class="btn btn-primary" type="button" onclick="removeQuestion()">Remove Question</button>
+        <button class="btn btn-primary" type="button" onclick="addQuestion()">Add Question</button>
+        <button class="btn btn-primary" onclick="saveExam()">Submit</button>
+        <button class="btn btn-primary" type="button" onclick="window.location.href='{{url_for('IC_dashboard')}}';">Go
+            to
+            Dashboard</button>
 
     </div>
-    <button onclick="removeQ()">Remove Question</button>
-    <button type="button" onclick="addQ();">Add Question</button>
-    <button type="button" onclick="validate()">Submit</button>
-    <button type="button" onclick="window.location.href='{{url_for('IC_dashboard')}}';">Go to Dashboard</button>
-
-</div>
-
+</form>
 <script src="{{url_for('static', filename='create_paper.js')}}"></script>
 {% endblock content%}

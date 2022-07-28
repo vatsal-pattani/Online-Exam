@@ -20,7 +20,8 @@
   display: block;
   padding: 20px;
   overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  overflow-y: auto;
+  /* Scrollable contents if viewport is shorter than content. */
   max-height: fit-content;
 }
 
@@ -32,11 +33,12 @@
 
 @media (min-width: 768px) {
   .main {
-  padding-right: 40px;
-  padding-left: 20rem; /* 180 + 40 */
-}
+    padding-right: 40px;
+    padding-left: 20rem;
+    /* 180 + 40 */
+  }
 }
 
 label {
-	float: inline-start;
+  float: inline-start;
 }

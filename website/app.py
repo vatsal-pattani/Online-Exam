@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from .users import *
 from dotenv import load_dotenv
+import datetime
 import os
 
 load_dotenv()  # take environment variables from .env.
@@ -9,6 +10,7 @@ load_dotenv()  # take environment variables from .env.
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'img')
 app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
+# session.clear()
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -268,28 +270,29 @@ def create_paper():
     return render_template("create_paper.html", session=session)
 
 
-@app.route('/add_question', methods=['POST'])
-def add_question():  # This will add paper to db
-    print("We are here!")
-    # print(request.form)
-    form = request.form
-    last_qid = execute(f'''select Q_id from Questions
-                order by Q_id desc
-                limit 1''')[0][0]
-    new_qid = "q" + str(int(last_qid[1:]) + 1).zfill(5)   # Creating a new e_id
-    print(new_qid)
-    execute(f'''insert into Questions(Q_id,marks,Question,Opt1,Opt2,Opt3,Opt4,correct_ans,E_id,C_id)
-                values ('{new_qid}',{int(form['marks'])},'{form['q']}', '{form['A']}','{form['B']}','{form['C']}','{form['D']}','{form['c_ans']}','{session['new_eid']}','{session['c_id']}'); ''')
-    return "Question added successfully"
-
-
 @app.route('/add_exam', methods=['POST'])
 def add_exam():
-    # print("We're in add exam!")
-    print(request.form)
     form = request.form
+    no_of_ques = (len(request.form) - 4) // 7
+    q_id = execute(f'''select Q_id from Questions
+                order by Q_id desc
+                limit 1''')[0][0]
+    for ques_no in range(1, no_of_ques + 1):
+        next_qid = "q" + str(ques_no + int(q_id[1:])).zfill(5)
+        ques = form[f'q{ques_no}']
+        a = form[f'A{ques_no}']
+        b = form[f'B{ques_no}']
+        c = form[f'C{ques_no}']
+        d = form[f'D{ques_no}']
+        marks = int(form[f'marks{ques_no}'])
+        ans = form[f'correct_ans{ques_no}']
+        print(ques_no)
+        execute(
+            f'''insert into Questions(Q_id,marks,Question,Opt1,Opt2,Opt3,Opt4,correct_ans,E_id,C_id) values ('{next_qid}',{marks},'{ques}', '{a}','{b}','{c}','{d}','{ans}','{session['new_eid']}','{session['c_id']}'); ''')
+
+    duration = datetime.time(int(form['hours']), int(form['mins']))
     execute(f'''insert into Exam(E_id, C_id, duration, exam_time, total_marks)
-                values ('{session['new_eid']}','{session['c_id']}','{form['duration']}','{form['timing']}',{int(form['total_marks'])}) ''')
+                values ('{session['new_eid']}','{session['c_id']}','{duration}','{form['start_time']}',{int(form['total_marks'])}) ''')
     flash('Paper Added Successfully', 'success')
     return redirect(url_for('IC_dashboard'))
 
