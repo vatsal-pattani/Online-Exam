@@ -1,23 +1,27 @@
-import mysql.connector as c
+import psycopg2 as c
 import os
-
 
 
 def connect():
     try:
-        mydb = c.connect(
-            host="localhost",
-            port="3306",
-            user="root",
-            passwd=os.environ.get("DBS_VI_PASSWORD"),
-            database="dbs_vi"
-        )
+        DATABASE_URL = os.environ.get('DATABASE_URL')
+        if DATABASE_URL:
+            mydb = c.connect(DATABASE_URL, sslmode='require')
+        else:
+            mydb = c.connect(
+                host="localhost",
+                port="5432",
+                user="postgres",
+                password=os.environ.get("DBS_VI_PASSWORD"),
+                database="dbs_vi"
+            )
+
         return mydb
+
     except Exception as exec:
         print("Connection couldn't be established")
-        print(exec)
+        # print(exec)
         exit()
-
 
 
 def s_login(mydb, ID, passw):
@@ -27,4 +31,4 @@ def s_login(mydb, ID, passw):
     # cur.execute('''SHOW tables''')
     # result = cur.fetchall()
     # for db in result:
-    #     print(db)
+    #     # print(db)

@@ -10,7 +10,11 @@ load_dotenv()  # take environment variables from .env.
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'img')
 app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
-# session.clear()
+
+
+def get_app():
+    return app
+
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -22,17 +26,16 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    log_type = request.args.get('type')
+@app.route('/<log_type>/login', methods=['GET', 'POST'])
+def login(log_type):
     if log_type not in ["Student", "IC", "Admin"]:
         return render_template("404.html"), 404
     return render_template("login.html", log_type=log_type)
 
 
-@app.route('/verify/<log_type>', methods=['POST'])
+@app.route('/<log_type>/verify', methods=['POST'])
 def verify(log_type):
-    print("verification started")
+    # print("verification started")
     ID = request.form.get('ID')
     passw = request.form.get('passw')
     result = verify_in_db(ID, passw, log_type)
@@ -41,11 +44,11 @@ def verify(log_type):
         # redirect back to home page
         return "<h1>Incorrect ID or Password</h1>"
 
-    print("verified")
+    # print("verified")
 
     session["ID"] = ID  # Storing in session
     session["log_type"] = log_type  # No need to store password
-    print(log_type)
+    # print(log_type)
     if(log_type == "Student"):
         return redirect(url_for('dashboard'))
     elif(log_type == "IC"):
@@ -65,10 +68,10 @@ def dashboard():
     ID = session['ID']
     # getCourses is unnecessary function. We can do it just by execute
     courses = getCourses(ID)
-    print("session")
-    print(session)
-    S_name = execute(f'''select S_id,S_Name 
-             from Student as temp_s 
+    # print("session")
+    # print(session)
+    S_name = execute(f'''select S_id,S_Name
+             from Student as temp_s
              where (S_id = '{ID}');''')[0][1]
     return render_template("dashboard.html", courses=courses, S_name=S_name)
 
@@ -80,8 +83,16 @@ def papers():
     c_id = execute(
         f'''select C_id from course where (title = '{subject}'); ''')
     session['c_id'] = c_id[0][0]
-    papers = execute(
+    papers_db = execute(
         f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{c_id[0][0]}'); ''')
+
+    papers = []
+    for idx, paper in enumerate(papers_db):
+        dur = papers_db[idx][1].strftime("%H:%M:%S")
+        date = papers_db[idx][2].strftime("%Y/%m/%d")
+        time = papers_db[idx][2].strftime("%H:%M")
+        papers.append((paper[0], dur, date, time))
+
     return render_template('papers.html', papers=papers, subject=subject)
 
 
@@ -97,7 +108,7 @@ def questions():
     total_marks = execute(
         f'''select total_marks from exam where (exam.e_id = '{E_id}') and (exam.c_id = '{session['c_id']}');''')[0][0]
     session['total_marks'] = total_marks
-    print("Total Marks:", total_marks)
+    # print("Total Marks:", total_marks)
 
     if given[0][0] == 1:
         # given is 1 if student has already attempted the paper
@@ -151,7 +162,6 @@ def result():
         # Here we are not saving E_id to db. Hence, if same question(with same Q_id) is added to multiple papers, and the student attempts multiple of those papers, then it will create an issue.
         # But assume that a question belongs to one paper only
         ID = session['ID']
-
         query = f'''insert into Response(Q_id,S_id,marks,Response)
                         values '''
         null_val = 'NULL'
@@ -168,17 +178,19 @@ def result():
         query += ";"  # Adding one semicolon
         execute(query)    # This saves Response in db
 
-        time_taken = request.form.get('tt')
+        time_taken = str(datetime.timedelta(
+            seconds=int(request.form.get('tt'))))
+
         # Now We have to add these obtined marks to Result table. Keeping time taken as 0 for now
         execute(f'''insert into Result(E_id, C_id, S_id, marks, time_taken)
-                    values ('{session['E_id']}','{session['c_id']}','{ID}',{obtained_marks},{time_taken}); ''')
+                    values ('{session['E_id']}','{session['c_id']}','{ID}',{obtained_marks}, '{time_taken}'); ''')
 
     else:
         # Fetch student's result from database
         result = execute(
             f'''select marks,time_taken from Result where (Result.C_id = '{session['c_id']}') and (Result.S_id = '{session['ID']}') and (Result.E_id = '{session['E_id']}'); ''')
 
-        print("Result from db: ", result)
+        # print("Result from db: ", result)
         obtained_marks = result[0][0]
         time_taken = result[0][1]
         session['obtained_marks'] = obtained_marks
@@ -193,8 +205,8 @@ def response():
         f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{session['E_id']}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
 
     # Fetch given_ans from db
-    given_ans = execute(f'''select response from response 
-                    where response.s_id='{session['ID']}' and response.Q_id in 
+    given_ans = execute(f'''select response from response
+                    where response.s_id='{session['ID']}' and response.Q_id in
                     (select Q_id from Questions where (Questions.E_id='{session['E_id']}') and (Questions.c_id='{session['c_id']}'));''')
 
     result = execute(
@@ -206,10 +218,10 @@ def response():
 @app.route('/leaderboard')
 def leaderboard():
     LeadBoard = execute(
-        f'''select S_id,S_name,marks,time_taken 
+        f'''select S_id,S_name,marks,time_taken
             from (Result natural join student)
             where (Result.C_id = '{session['c_id']}') and (Result.E_id = '{session['E_id']}') order by Marks desc, time_taken asc;  -- Displays leaderboard for this test ''')
-    print(LeadBoard)
+    # print(LeadBoard)
     return render_template('Leaderboard.html', lb=LeadBoard, subject=session['subject'], paper=session['E_id'], tm=session['total_marks'], zip=zip, S_id=session['ID'])
 
 
@@ -223,29 +235,35 @@ def logout():
 def IC_dashboard():
     # We have ID and log_type at this point
     # Now we have to fetch all info of his course
-    print(session['ID'])
-    IC_info = execute(f'''select IC_Name,title,C_id 
-                    from Course 
+    IC_info = execute(f'''select IC_Name,title,C_id
+                    from Course
                     where (IC_id = '{session['ID']}'); ''')[0]
 
     course_name = IC_info[1]
     session['subject'] = course_name
     session['c_id'] = IC_info[2]
 
-    papers = execute(
+    papers_db = execute(
         f'''select E_id,duration,exam_time from Exam where (Exam.C_id = '{session['c_id']}'); ''')
+
+    papers = []
+    for idx, paper in enumerate(papers_db):
+        dur = papers_db[idx][1].strftime("%H:%M:%S")
+        date = papers_db[idx][2].strftime("%Y/%m/%d")
+        time = papers_db[idx][2].strftime("%H:%M")
+        papers.append((paper[0], dur, date, time))
 
     return render_template("IC_dashboard.html", IC_info=IC_info, papers=papers, subject=course_name)
 
 
-@app.route('/view_paper')
+@ app.route('/view_paper')
 def view_paper():
     E_id = request.args.get('E_id')
-    print(request.args)
+    # print(request.args)
     # session['E_id'] = E_id
 
-    print(E_id)
-    print(session['c_id'])
+    # print(E_id)
+    # print(session['c_id'])
     session['E_id'] = E_id
     questions = execute(
         f'''select marks, Question, Opt1, Opt2, Opt3, Opt4, Q_id, correct_ans from Questions where (questions.E_id = '{E_id}') and (questions.C_id = '{session['c_id']}'); -- Displays all questions of that test ''')
@@ -257,7 +275,7 @@ def view_paper():
     return render_template("questions_IC.html", questions=questions, tm=exam_info[0], duration=exam_info[1])
 
 
-@app.route('/create_paper', methods=['GET', 'POST'])
+@ app.route('/create_paper', methods=['GET', 'POST'])
 def create_paper():
     # First we will have to generate new E_id for this c_id, we'll have to refer to db for that
     last_eid = execute(f'''select E_id from exam
@@ -270,13 +288,20 @@ def create_paper():
     return render_template("create_paper.html", session=session)
 
 
-@app.route('/add_exam', methods=['POST'])
+@ app.route('/add_exam', methods=['POST'])
 def add_exam():
     form = request.form
     no_of_ques = (len(request.form) - 4) // 7
+    duration = datetime.time(int(form['hours']), int(form['mins']))
+
+    # Create Exam
+    execute(f'''insert into Exam(E_id, C_id, duration, exam_time, total_marks)
+                values ('{session['new_eid']}','{session['c_id']}','{duration}','{form['start_time']}',{int(form['total_marks'])}) ''')
     q_id = execute(f'''select Q_id from Questions
                 order by Q_id desc
                 limit 1''')[0][0]
+
+    # Add Questions to Exam
     for ques_no in range(1, no_of_ques + 1):
         next_qid = "q" + str(ques_no + int(q_id[1:])).zfill(5)
         ques = form[f'q{ques_no}']
@@ -286,29 +311,26 @@ def add_exam():
         d = form[f'D{ques_no}']
         marks = int(form[f'marks{ques_no}'])
         ans = form[f'correct_ans{ques_no}']
-        print(ques_no)
+        # print(ques_no)
         execute(
             f'''insert into Questions(Q_id,marks,Question,Opt1,Opt2,Opt3,Opt4,correct_ans,E_id,C_id) values ('{next_qid}',{marks},'{ques}', '{a}','{b}','{c}','{d}','{ans}','{session['new_eid']}','{session['c_id']}'); ''')
 
-    duration = datetime.time(int(form['hours']), int(form['mins']))
-    execute(f'''insert into Exam(E_id, C_id, duration, exam_time, total_marks)
-                values ('{session['new_eid']}','{session['c_id']}','{duration}','{form['start_time']}',{int(form['total_marks'])}) ''')
     flash('Paper Added Successfully', 'success')
     return redirect(url_for('IC_dashboard'))
 
 
-@app.route('/edit_paper/<E_id>')
+@ app.route('/edit_paper/<E_id>')
 def edit_paper(E_id):
-    print(E_id)
+    # print(E_id)
     return "Here you edit the paper"
 
 
-@app.errorhandler(404)
+@ app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
 
-@app.route('/img/<path:filename>')
+@ app.route('/img/<path:filename>')
 def img(filename):
     return send_from_directory(
         app.config['UPLOAD_FOLDER'],

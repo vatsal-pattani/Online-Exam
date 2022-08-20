@@ -17,48 +17,21 @@
         <div class="col">
             <div class="card card-sm border-warning">
                 <div class="card-body" name="paper" id="{{paper}}">
-                    <h3 class="card-title"></h3>
-                    <p class="card-text mb-0"></p>
-                    <p class="card-text m-0"></p>
-                    <p class="card-text m-0"></p>
-                    <a href="{{url_for('view_paper', E_id = paper[0], duration = paper[1], time = paper[2] )}}" class="stretched-link"></a>
+                    <h3 class="card-title">Paper-{{ loop.index }}</h3>
+                    <p class="card-text mb-0"><b>Duration- </b> {{ paper[1] }}</p>
+                    <p class="card-text m-0"><b>Date- </b>{{ paper[2] }}</p>
+                    <p class="card-text m-0"><b>Time- </b>{{ paper[3] }}</p>
+                    <a href="{{url_for('view_paper', E_id = paper[0], duration = paper[1], time = paper[2] )}}"
+                        class="stretched-link"></a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     <div class="mt-3">
-        <button class="btn btn-primary" onclick="window.location.href='{{ url_for( 'create_paper') }}';">Add new paper</button>
+        <button class="btn btn-primary" onclick="window.location.href='{{ url_for( 'create_paper') }}';">Add new
+            paper</button>
     </div>
 </div>
-
-<script>
-    var no=1;
-    innerText();
-    function innerText(){
-        let papers = document.getElementsByName('paper');
-        for(var i=0; i<papers.length; i++){
-            var arr = papers[i].id.split(",");
-            var duration =  parseFloat(arr[1].split("=")[1].split(")")[0])/60;
-            papers[i].childNodes[1].innerHTML = "Paper-" + no;
-            papers[i].childNodes[3].innerHTML = "Duration- ".bold() + duration + " minutes";
-            var temp_timing = document.getElementsByName('paper')[i].id.split("datetime.datetime")[1].split('(')[1]
-            temp_timing = temp_timing.slice(0,-2);
-            var t = temp_timing.split(",");
-            var ld;
-            if(parseInt(t[4])/10 === 0){
-                ld = "0" + parseInt(t[4]);
-            }
-
-            var date =  parseInt(t[2]) + "/" + parseInt(t[1]) + "/" + parseInt(t[0]);
-            papers[i].childNodes[5].innerHTML = "Date- ".bold() + date;
-
-            var time = parseInt(t[3]) + ":" + ld
-            papers[i].childNodes[7].innerHTML = "Time- ".bold() + time;
-            no++;
-        }
-    }
-</script>
-
 
 {% endblock content%}
