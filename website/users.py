@@ -1,4 +1,4 @@
-
+from psycopg2 import ProgrammingError
 from .datab import connect
 
 # class User:
@@ -20,7 +20,7 @@ def verify_in_db(ID, passw, log_type):
     db = connect()
     cur = db.cursor()
     query = ""
-    print(log_type)
+    # print(log_type)
     if log_type == "Student":
         query = S_query
     elif log_type == "IC":
@@ -28,8 +28,8 @@ def verify_in_db(ID, passw, log_type):
     elif log_type == "Admin":
         query = Ad_query
 
-    # print("This is query:**************************************")
-    # print(query.format(ID=ID, passw=passw))
+    # # print("This is query:**************************************")
+    # # print(query.format(ID=ID, passw=passw))
 
     cur.execute(query.format(ID=ID, passw=passw))
 
@@ -39,8 +39,8 @@ def verify_in_db(ID, passw, log_type):
         return False
 
     else:
-        print(result)
-        print(type(result[0]))
+        # print(result)
+        # print(type(result[0]))
         return True
 
 
@@ -63,7 +63,12 @@ def execute(str):
     db.autocommit = True
     cur = db.cursor()
     cur.execute(str)
-    q_result = cur.fetchall()  # List of tuples. Each tuple is a row
+    q_result = []
+    try:
+        q_result = cur.fetchall()  # List of tuples. Each tuple is a row
+    except ProgrammingError as progError:
+        pass
+
     cur.close()
     return q_result
 # class Student():

@@ -1,4 +1,3 @@
-
 create table if not exists Student(
 S_id varchar(6) not null,
 S_Name varchar(25),
@@ -10,7 +9,9 @@ values
 	('s00001','Vatsal','s00001'),
     ('s00002','Ishvit','s00002'),
     ('s00003','Jainam','s00003'),
-    ('s00004','Krish','s00004');
+    ('s00004','Krish','s00004'),
+    ('s00005','Pranjal','s00005');
+
 
 
 create table if not exists Course(
@@ -31,7 +32,7 @@ create table if not exists Exam(
 E_id varchar(6) not null,
 C_id varchar(6) not null,
 duration time,
-exam_time datetime,
+exam_time timestamp,
 total_marks float,
 primary key(E_id,C_id),
 foreign key (C_id) references Course(C_id)
@@ -51,11 +52,13 @@ Opt2 text,
 Opt3 text,
 Opt4 text,
 correct_ans char(1),
-E_id varchar(6) references Exam,
-C_id varchar(6) references Exam,
+E_id varchar(6),
+C_id varchar(6),
 -- check(Q_id in ('q_____')),
 check(correct_ans in('A','B','C','D')),
-primary key (Q_id));
+primary key (Q_id),
+foreign key (E_id, C_id) references Exam(E_id, C_id)
+);
 
 insert into Questions(Q_id, Marks, Question, Opt1, Opt2, Opt3, Opt4, correct_ans, E_id, C_id)
 values ('q00001', 5, 'Q. A race condition occurs when?', 
@@ -129,37 +132,3 @@ E_id varchar(6) not null,
 Q_id varchar(6) not null,
 foreign key (Q_id) references Questions(Q_id),
 foreign key (E_id,C_id) references Exam(E_id,C_id));
-
-
--- drop admin_info;
--- drop student;
--- drop course;
--- drop exam;
--- drop questions;
--- drop result;
--- drop response;
--- drop takes;
--- drop belongs_to;
-
-
--- create table Has(
--- E_id int unsigned not null,
--- C_id int unsigned not null,
--- foreign key (E_id) references Exam,
--- foreign key (C_id) references Course);
-
--- create table E_R(
--- E_id int unsigned not null,
--- C_id int unsigned not null,
--- S_id int unsigned not null,
--- foreign key (S_id) references Student,
--- foreign key (E_id) references Exam,
--- foreign key (C_id) references Course);
-
--- create table Q_R(
--- Q_id int unsigned not null,
--- S_id int unsigned not null,
--- foreign key (Q_id) references Questions,
--- foreign key (S_id) references Student);
-
--- -------------------------------- --
